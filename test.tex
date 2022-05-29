@@ -1,0 +1,26 @@
+\documentclass{article}
+\usepackage{code-animation}
+
+\errorcontextlines9999
+\usepackage[encoding, defaultfont, fakeminted]{sopra-listings}
+\solsetmintedstyle{plain}
+
+\begin{document}
+\AnimateCode{}
+\begin{minted}{java}
+public static void main(String[] args) {
+   int i = 9;
+   char x = 'c';
+   System.out.println(x + ": " + i);
+}
+\end{minted}
+\endAnimateCode
+
+\begin{minted}{java}
+public static void main(String[] args) {
+   int i = 9;
+   char x = 'c';
+   System.out.println(x + ": " + i);
+}
+\end{minted}
+\end{document}
