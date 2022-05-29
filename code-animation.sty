@@ -76,20 +76,21 @@
     % the simple animation
     \def\ca@simple##1{\def\@anim{##1}}%
     % this one does reset all stored comments
-    \def\ca@resetsimple##1{\ca@simple{##1}\gdef\ca@CommentBuffer{/}}%
-    \def\ca@comment##1:##2\@null{\def\@anim{##1}\gdef\@comment@text{##2}}%
+    \def\ca@resetsimple##1{\ca@simple{##1}\def\ca@CommentBuffer{x/}}%
+    \def\ca@comment##1:##2\@null{\def\@anim{##1}\def\@comment@text{##2}}%
 }
 \def\ca@ExtendsCommentBuffer#1{\gappto\ca@CommentBuffer{,\the\csname c@codeanim@#1@lc\endcsname/#1}}
 \def\ca@DecodeAnimationCommand#1#2\@null{%
     \let\@anim\@empty \let\@comment@text\@empty
-    \if#1. \ca@resetsimple{#2}\else
-    \if#1/ \ca@comment#2\@null\else
+    \if#1. \typeout{DOT: #1#2}\ca@resetsimple{#2}\else
+    \if#1/ \typeout{SLASH: #1#2}\ca@comment#2\@null\else
     % else do it at a number:
-        \ca@simple{#1#2}%
+        \typeout{NONE: #1#2} \ca@simple{#1#2}%
     \fi\fi
 }
 % used for easier expandafter to lock the anim
-\def\ca@Only#1#2{\only<\@anim@on>{\global\def\ca@anim@currentline{#1}\global\def\ca@anim@currentcomment{#2}}}
+\def\ca@Only#1#2#3{\only<\@anim@on>{\gdef\ca@anim@currentline{#1}\gdef\ca@anim@currentcomment{#2}% we may globalize:
+\expandafter\gdef\expandafter\ca@CommentBuffer\expandafter{\ca@CommentBuffer}}}
 \def\ca@DecodeAnimations{%
     \def\ca@anim@currentline{0}% default if none is active
     % store the old before we overwrite:
@@ -99,8 +100,9 @@
     \fi}
     \@AnimationCommands
     \foreach[count=\@anim@on from \ca@firstslide] \@animcode in \ca@onslide@list {
-        \expandafter\ca@DecodeAnimationCommand\@animcode\@null
-        \expandafter\expandafter\expandafter\ca@Only\expandafter\expandafter\expandafter{\expandafter\@anim\expandafter}\expandafter{\@comment@text}%
+        \expandafter\ca@DecodeAnimationCommand\@animcode\@empty\@empty\@null
+        \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter
+        \ca@Only\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter{\expandafter\expandafter\expandafter\@anim\expandafter\expandafter\expandafter}\expandafter{\expandafter\@comment@text\expandafter}\expandafter{\ca@CommentBuffer}%
     }%
 }
 
