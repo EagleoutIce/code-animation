@@ -90,8 +90,6 @@
 
 % we make it so that any item is *command* :)
 \def\@AnimationCommands{%
-% TODO: get resets correct!
-% TODO: in handout: rest in iteration directly if below current (inverse?) mapping
     \mode<all>{\def\ca@reset{\def\ca@comments@from{\@anim@on}}}%
     \mode<handout>{\def\ca@reset{% directly reset
         % if anim@on is below current:
@@ -145,11 +143,16 @@
 \def\ca@DecodeHandouts{% just create the mappings
     % TODO: update this to use a custom '<from> -> <to>' syntax or so
     % TODO: explain how to use this if 1 is to be on 2-10 and 2 is to be on 4 only (by doing it extra)
+    \gdef\@ca@collector{}%
     \foreach \@from/\@to in \ca@onhandout@list {%
         % we make this bidirectional to get comment ranges
-        \expandafter\xdef\csname ca@@map@\@from @\endcsname{\@to}%
-        \expandafter\xdef\csname ca@@map@inv@\@to @\endcsname{\@from}%
+        \xappto\@ca@collector{%
+            \noexpand\expandafter\noexpand\edef\noexpand\csname ca@@map@\@from @\endcsname{\@to}%
+            \noexpand\expandafter\noexpand\edef\noexpand\csname ca@@map@inv@\@to @\endcsname{\@from}%
+        }
     }%
+    \@ca@collector% keep the definitions local, only the collector is global and
+    % more easily reset than a potentially infinite map :D
 }
 
 \def\ca@DecodeAnimations{%
