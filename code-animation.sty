@@ -1,0 +1,81 @@
+\ProvidesPackage{code-animation}[2022/05/22 EagleoutIce - animating runs through code with beamer]
+
+% TODO: customize beamer stuff :D
+\RequirePackage{etoolbox}
+\RequirePackage{listings}
+\RequirePackage{tikz}
+\usetikzlibrary{tikzmark}
+
+\RequirePackage{fontawesome}
+\RequirePackage{xxcolor} % mixin
+
+% we may want to add a new literate to be used in the code:
+% TODO:
+\def\ca@lst@addToLiterate#1{\protected@edef\lst@literate{\unexpanded\expandafter{\lst@literate}\unexpanded{#1}}}
+\lst@Key{code-animations@add to literate}{}{\ca@lst@addToLiterate{#1}}
+
+% TODO: redfine to kill that :D
+\def\ca@colormixin@env{colormixin}
+%
+
+% i do not use groups as this has problems with lst
+% as they can not be nested, one storage is enough
+\def\ca@colormixin@suff{!15!lightgray}
+\let\ca@oldcolormixin\@empty
+\def\ca@fadeout@start{%
+\let\ca@Mixin\ca@colormixin@env
+\let\ca@oldcolormixin\colorcurrentmixin
+\edef\colorcurrentmixin{\ca@colormixin@suff\colorcurrentmixin}\color{.}%
+}
+% guard to not close unnecessary
+\def\ca@fadeout@end{\ifx\ca@colormixin@env\ca@Mixin
+\let\colorcurrentmixin\ca@oldcolormixin\color{.}\fi\let\ca@Mixin\relax}%
+
+\def\ca@Strut{\vphantom{\sol@font@fs@normal\sol@styles@lst@basic\strut}}
+
+% TODO: use firstoftwo and second of two
+\def\ca@InCurrentLine#1#2#3{\expandafter\ifnum\number\csname c@codeanim@#1@lc\endcsname=\ca@anim@currentline#2\else#3\fi}
+
+% #1 is a coordinate prefix to be used outside
+\newcommand\ca@AnimateCode[1][@]{%
+\ifcsname c@codeanim@#1@lc\endcsname\else
+\expandafter\newcount\csname c@codeanim@#1@lc\endcsname\fi
+% we appto locally to increment the current line counter
+\appto\lsthk@OnNewLine{%
+    % get the end marker for this line
+    \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @end}{\ca@Strut}%
+    % step the line id counter
+    \global\advance\csname c@codeanim@#1@lc\endcsname by1\relax
+    % done! no do the fadeout
+    \ca@fadeout@end % will automatically hide if not in env
+}%
+% hook the start marker at the beginning:
+\appto\lsthk@EveryPar{%
+    \ca@InCurrentLine{#1}\relax\ca@fadeout@start
+    \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
+}
+% furthermore we want to configure some numbers with beamer animations!
+% TODO:
+\def\ca@anim@currentline{2}%
+% TODO: support for mid-code highlights by literates! like @ as a marker?!
+\def\ca@anim@curentlocation{start}
+}
+
+\pgfqkeys{/ca@animate@code}{%
+  onslide/.store in=\ca@onslide@list,
+  first slide/.store in=\ca@firstslide,
+  defaults/.style={first slide=1,onslide={}}
+}
+
+\def\ca@Leftmark{\llap{\faAngleRight~}}
+\def\ca@Rightmark{\rlap{~\faAngleLeft}}
+\def\ca@DoCodeAnimation{%
+\tikzpicture[overlay,remember picture]
+\node[left] at (ca@\ca@cdname-2@start.east) {\ca@Leftmark};
+\endtikzpicture}
+
+\newenvironment{AnimateCode}[2][@]{\begingroup
+\pgfqkeys{/ca@animate@code}{defaults, #2}%
+\def\ca@cdname{#1}\ca@AnimateCode[#1]}{\ca@DoCodeAnimation\endgroup}
+
+\endinput
