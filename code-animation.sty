@@ -9,6 +9,7 @@
 \RequirePackage{fontawesome}
 \RequirePackage{xxcolor} % mixin
 
+% TODO: allow for symbolic markers in the animations to reuse them instead of the animation number (e.g -> storeXX syntax) (StoreHandoutTo, StoreAnimationTo)
 % we may want to add a new literate to be used in the code:
 % TODO:
 \def\ca@lst@addToLiterate#1{\protected@edef\lst@literate{\unexpanded\expandafter{\lst@literate}\unexpanded{#1}}}
@@ -83,8 +84,7 @@
 }%
 % furthermore we want to configure some numbers with beamer animations!
 % TODO: support for mid-code highlights by literates! like @ as a marker?!
-% TODO: support for end
-\def\ca@anim@curentlocation{start}%
+\ca@DecodeHandouts
 \ca@DecodeAnimations
 \@Esphack}
 
@@ -101,6 +101,8 @@
         \def\Line####1{\def\@anim{####1}}%
         \def\Comment####1{\def\@comment@text{####1}}%
         \def\Reset{\def\ca@comments@from{\@anim@on}}%
+        \def\StoreAnimationTo####1{\xdef####1{\@anim@on}}%
+        \def\StoreHandoutTo####1{\xdef####1{\ca@MapToHandout{\@anim@on}}}%
         \def\Location####1{\def\ca@anim@curentlocation{####1}}%
         \def\Others####1{\def\ca@anim@otherhighlights{####1}}%
         \relax
@@ -108,6 +110,7 @@
 }
 \def\ca@DecodeAnimationCommand#1#2\@null{%
     \def\@anim{0}\let\@comment@text\@empty \let\ca@anim@otherhighlights\@empty
+    \def\ca@anim@curentlocation{start}% default value(s)
     \if#1. \ca@resetsimple{#2}\else
     \if#1: \ca@simpleothers#2\@null\else
     \if#1/ \ca@comment#2\@null\else
@@ -119,7 +122,7 @@
 }
 % used for easier expandafter to lock the anim
 % we may globalize:
-\def\ca@Only#1#2#3#4#5{\only<\@anim@on|handout:0>{% this is the activator
+\def\ca@Only#1#2#3#4#5{\only<\@anim@on|handout:\ca@MapToHandout{\@anim@on}>{% this is the activator
     \gdef\ca@comments@from{#1}% re-account comments from this id
     \gdef\ca@anim@currentline{#2}%
     \gdef\ca@anim@currentcomment{#3}%
@@ -127,6 +130,18 @@
     \gdef\ca@anim@otherhighlights{#5}% highlight lines (extra) in fade-out
 }}
 
+% if it is not there, do not put it on the handout
+\def\ca@MapToHandout#1{\@ifundefined{ca@@map@#1@}{0}{\csname ca@@map@#1@\endcsname}}
+\def\ca@MapFromHandout#1{\@ifundefined{ca@@map@inv@#1@}{0}{\csname ca@@map@inv@#1@\endcsname}}
+\def\ca@DecodeHandouts{% just create the mappings
+    % TODO: update this to use a custom '<from> -> <to>' syntax or so
+    % TODO: explain how to use this if 1 is to be on 2-10 and 2 is to be on 4 only (by doing it extra)
+    \foreach \@from/\@to in \ca@onhandout@list {%
+        % we make this bidirectional to get comment ranges
+        \expandafter\xdef\csname ca@@map@\@from @\endcsname{\@to}%
+        \expandafter\xdef\csname ca@@map@inv@\@to @\endcsname{\@from}%
+    }%
+}
 
 \def\ca@DecodeAnimations{%
     \def\ca@anim@currentline{0}% default if none is active
@@ -145,8 +160,9 @@
 
 \pgfqkeys{/ca@animate@code}{%
   onslide/.store in=\ca@onslide@list,
+  handout/.store in=\ca@onhandout@list, % list in format {<anim-list>}/<handout>
   first slide/.store in=\ca@firstslide,
-  defaults/.style={first slide=1,onslide={}}
+  defaults/.style={first slide=1,onslide={},handout={}}
 }
 
 \def\ca@Leftmark{\llap{\faAngleRight~}}
@@ -170,8 +186,18 @@
 % animate all visible ones
 % do not go down:
 % include '='
-\ifnum\ca@comments@from>\the\numexpr\insertslidenumber-1\relax\else
-\foreach \@comment@on in {\ca@comments@from,...,\the\numexpr\insertslidenumber-1} {
+\mode
+<all>%
+\edef\ca@Maximum{\the\numexpr\insertslidenumber-1\relax}%
+\mode
+<handout>%
+\def\ca@Maximum{\ca@MapFromHandout{\insertslidenumber}}%
+\mode
+<all>%
+% TODO: get resets correct!
+% TODO: in handout: rest in iteration directly if below current (inverse?) mapping
+\ifnum\ca@comments@from>\ca@Maximum\else
+\foreach \@comment@on in {\ca@comments@from,...,\ca@Maximum} {
     \@ifundefined{@\@comment@on @comment@text}{}{%
         \node[ca@CommentNode@out] at (ca@\ca@cdname-\csname @\@comment@on @comment@location\endcsname @end.east) {\ignorespaces\csname @\@comment@on @comment@text\endcsname};
     }
