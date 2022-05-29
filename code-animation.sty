@@ -70,9 +70,22 @@
 
 % used for easier expandafter to lock the anim
 \def\ca@Only#1{\only<\@anim@on>{\global\def\ca@anim@currentline{#1}}}
+% we make it so that any item is *command* :)
+\def\@AnimationCommands{%
+    % the simple animation
+    \def\ca@dot##1{\def\@anim{##1}}
+}
+\def\ca@DecodeAnimationCommand#1#2\@null{
+    \if#1. \ca@dot{#2}\else
+    % else do it at a number:
+        \ca@dot{#1#2}
+    \fi
+}
 \def\ca@DecodeAnimations{%
     \def\ca@anim@currentline{0}% default if none is active
-    \foreach[count=\@anim@on from \ca@firstslide] \@anim in \ca@onslide@list {
+    \@AnimationCommands
+    \foreach[count=\@anim@on from \ca@firstslide] \@animcode in \ca@onslide@list {
+        \expandafter\ca@DecodeAnimationCommand\@animcode\@null
         \expandafter\ca@Only\expandafter{\@anim}%
     }%
 }
