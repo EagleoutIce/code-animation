@@ -140,16 +140,17 @@
 % if it is not there, do not put it on the handout
 \def\ca@MapToHandout#1{\@ifundefined{ca@@map@#1@}{0}{\csname ca@@map@#1@\endcsname}}
 \def\ca@MapFromHandout#1{\@ifundefined{ca@@map@inv@#1@}{0}{\csname ca@@map@inv@#1@\endcsname}}
+% from | to
+\def\ca@make@mapping#1#2{\gappto\@ca@collector{\expandafter\def\csname ca@@map@#1@\endcsname{#2}%
+\expandafter\def\csname ca@@map@inv@#2@\endcsname{#1}}}
 \def\ca@DecodeHandouts{% just create the mappings
     % TODO: update this to use a custom '<from> -> <to>' syntax or so
     % TODO: explain how to use this if 1 is to be on 2-10 and 2 is to be on 4 only (by doing it extra)
     \gdef\@ca@collector{}%
     \foreach \@from/\@to in \ca@onhandout@list {%
         % we make this bidirectional to get comment ranges
-        \xappto\@ca@collector{%
-            \noexpand\expandafter\noexpand\edef\noexpand\csname ca@@map@\@from @\endcsname{\@to}%
-            \noexpand\expandafter\noexpand\edef\noexpand\csname ca@@map@inv@\@to @\endcsname{\@from}%
-        }
+        % do not edef so that we can use macros here
+        \expandafter\expandafter\expandafter\ca@make@mapping\expandafter\expandafter\expandafter{\expandafter\@from\expandafter}\expandafter{\@to}
     }%
     \@ca@collector% keep the definitions local, only the collector is global and
     % more easily reset than a potentially infinite map :D
@@ -157,6 +158,7 @@
 
 \def\ca@DecodeAnimations{%
     \def\ca@anim@currentline{0}% default if none is active
+    \let\ca@anim@currentcomment\@empty
     \@AnimationCommands
     % clear it on the start
     \only<\ca@firstslide>{\def\ca@comments@from{0}}%
@@ -193,8 +195,10 @@
 \else % TODO: use botmark!
     \node[right] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ca@Rightmark};
 \fi\fi
+\fi % i want comments with my zero :)
     % put a comment there:
     \node[ca@CommentNode] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ignorespaces\ca@anim@currentcomment};
+
 % animate all visible ones
 % do not go down:
 % include '='
@@ -206,7 +210,6 @@
         \node[ca@CommentNode@out] at (ca@\ca@cdname-\csname @\@comment@on @comment@location\endcsname @end.east) {\ignorespaces\csname @\@comment@on @comment@text\endcsname};
     }
 }
-\fi
 \fi
 % \node[above right] at(current page.south west) {\insertslidenumber};
 \endtikzpicture}

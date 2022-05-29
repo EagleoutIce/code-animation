@@ -1,14 +1,20 @@
-\documentclass[handout]{beamer}
+\documentclass{beamer}
 \usepackage{code-animation}
 
+% TODO: keep ghost markers for recursion (similar to comments)
+% todo: clear single comments
+% todo: elements without anim?
+% TODO: make store automatically detect handout and anim!
+% TODO: \+ etc... for adding
 \errorcontextlines9999
 \usepackage[encoding, defaultfont, fakeminted]{sopra-listings}
 \solsetmintedstyle{plain}
 
-% TODO: handout mode
 \begin{document}
+% \CodeAnimationsNoFadeOut
 \begin{frame}[fragile]
-\AnimateCode{onslide={4, % just a highlight
+\AnimateCode{onslide={%
+   4, % just a highlight
    :1:{6}, % : allows to specify others to highlight
    /2: Nun ist \T{i = 9}, % highlight with comment
    /3: Hat jemand einen Pinguin gesehen?,
@@ -18,7 +24,7 @@
    3,3, 0, % Dopplungen sind kein Problem, 0 shows full code
    *\Line{4}\Comment{Walter}\Location{end}\StoreAnimationTo\Walter\StoreHandoutTo\WalterHandout,% komplett frei :D
    3, .4
-},handout={5/2,15/3},first slide=2}
+},handout={5/2,\WalterHandout/3},first slide=2}
 \begin{minted}{java}
 public static void main(String[] args) {
    int i = 9;
