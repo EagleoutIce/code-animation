@@ -49,10 +49,19 @@
     \expandafter\ifnum\number\csname c@codeanim@#1@lc\endcsname=\ca@anim@currentline
     #2\else#3\fi\else#2\fi}
 
+\newif\if@ca@@active@found@
+\def\ca@InOtherLineActive#1#2#3{%
+    \global\@ca@@active@found@false
+    \foreach\k in \ca@anim@otherhighlights{%
+        \ifnum\k=\number\csname c@codeanim@#1@lc\endcsname\relax \global\@ca@@active@found@true\breakforeach\fi
+    }%
+    \if@ca@@active@found@#2\else#3\fi% no groups :)
+}
+
 % the initial comments marker
 \def\ca@comments@from{0}
 % #1 is a coordinate prefix to be used outside
-\newcommand\ca@AnimateCode[1][@]{%
+\newcommand\ca@AnimateCode[1][@]{\@bsphack% just to block spaces and stuff for sure
 \ifcsname c@codeanim@#1@lc\endcsname\else
 \expandafter\newcount\csname c@codeanim@#1@lc\endcsname\fi
 % reset counter in any way!
@@ -69,7 +78,7 @@
 % hook the start marker at the beginning:
 \appto\lsthk@EveryPar{%
     % using empty so it does not jump!
-    \ca@InCurrentLineActive{#1}\@empty\ca@fadeout@start
+    \ca@InCurrentLineActive{#1}\@empty{\ca@InOtherLineActive{#1}\@empty{\ca@fadeout@start}}\relax
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
 }%
 % furthermore we want to configure some numbers with beamer animations!
@@ -77,8 +86,7 @@
 % TODO: support for end
 \def\ca@anim@curentlocation{start}%
 \ca@DecodeAnimations
-
-}
+\@Esphack}
 
 % we make it so that any item is *command* :)
 \def\@AnimationCommands{%
@@ -86,6 +94,7 @@
     \def\ca@simple##1{\def\@anim{##1}}%
     % shift commentframe
     \def\ca@resetsimple##1{\ca@simple{##1}\def\ca@comments@from{\@anim@on}}%
+    \def\ca@simpleothers##1:##2\@null{\def\@anim{##1}\def\ca@anim@otherhighlights{##2}}%
     \def\ca@comment##1:##2\@null{\def\@anim{##1}\def\@comment@text{##2}}%
     \def\ca@resetcomment{\def\ca@comments@from{\@anim@on}\ca@comment}%
     \def\ca@custom{%
@@ -93,22 +102,32 @@
         \def\Comment####1{\def\@comment@text{####1}}%
         \def\Reset{\def\ca@comments@from{\@anim@on}}%
         \def\Location####1{\def\ca@anim@curentlocation{####1}}%
+        \def\Others####1{\def\ca@anim@otherhighlights{####1}}%
         \relax
     }%
 }
 \def\ca@DecodeAnimationCommand#1#2\@null{%
-    \def\@anim{0}\let\@comment@text\@empty
+    \def\@anim{0}\let\@comment@text\@empty \let\ca@anim@otherhighlights\@empty
     \if#1. \ca@resetsimple{#2}\else
+    \if#1: \ca@simpleothers#2\@null\else
     \if#1/ \ca@comment#2\@null\else
     \if#1| \ca@resetcomment#2\@null\else
     \if#1* \ca@custom#2\else
     % else do it at a number:
         \ca@simple{#1#2}%
-    \fi\fi\fi\fi
+    \fi\fi\fi\fi\fi
 }
 % used for easier expandafter to lock the anim
 % we may globalize:
-\def\ca@Only#1#2#3#4{\only<\@anim@on>{\gdef\ca@comments@from{#1}\gdef\ca@anim@currentline{#2}\gdef\ca@anim@currentcomment{#3}\gdef\ca@anim@curentlocation{#4}}}
+\def\ca@Only#1#2#3#4#5{\only<\@anim@on>{% this is the activator
+    \gdef\ca@comments@from{#1}% re-account comments from this id
+    \gdef\ca@anim@currentline{#2}%
+    \gdef\ca@anim@currentcomment{#3}%
+    \gdef\ca@anim@curentlocation{#4}%
+    \gdef\ca@anim@otherhighlights{#5}% highlight lines (extra) in fade-out
+}}
+
+
 \def\ca@DecodeAnimations{%
     \def\ca@anim@currentline{0}% default if none is active
     \@AnimationCommands
@@ -118,7 +137,8 @@
         \expandafter\ca@DecodeAnimationCommand\@animcode\@empty\@empty\@null
         \expandafter\protected@xdef\csname @\@anim@on @comment@text\endcsname{\@comment@text}
         \expandafter\protected@xdef\csname @\@anim@on @comment@location\endcsname{\@anim}
-        \protected@edef\@tmpargs{{\ca@comments@from}{\@anim}{\@comment@text}{\ca@anim@curentlocation}}%
+        % takeover expanded (protection for comments)
+        \protected@edef\@tmpargs{{\ca@comments@from}{\@anim}{\@comment@text}{\ca@anim@curentlocation}{\ca@anim@otherhighlights}}%
         \expandafter\ca@Only\@tmpargs
     }%
 }
