@@ -11,9 +11,35 @@
 \AnimateCode{onslide={1, % just a highlight
    /2: Nun ist \T{i = 9}, % highlight with comment
    /3: Hat jemand einen Pinguin gesehen?,
+   /4: $3x^2$, .5, % basic highlight which rests comments
+   /2: Nun ist wieder \T{i = 9}, /3: Pinguuuu, 4,
+   |5: Ein neues leben!,% comments which resets other comments
+   3,3, 0, % Dopplungen sind kein Problem, 0 shows full code
+   *\Line{4}\Comment{Walter}\Location{end},% komplett frei :D
+   3, .4
+},first slide=2}
+\begin{minted}{java}
+public static void main(String[] args) {
+   int i = 9;
+   char x = 'c';
+   String k = "k";
+   System.out.println(x + ": " + i);
+}
+\end{minted}
+\endAnimateCode
+\end{frame}
+
+\begin{frame}
+   buffer
+\end{frame}
+
+\begin{frame}[fragile]
+\AnimateCode{onslide={1, % just a highlight
+   /2: Nun ist \T{i = 12}, % highlight with comment
+   /3: Hat jemand einen Pinguin gesehen?,
    /4: $3x^2$,
    .5, % basic highlight which rests comments
-   /2: Nun ist wieder \T{i = 9},
+   /2: Nun ist wieder \T{i = 12},
    /3: Pinguuuu,
    4,
    |5: Ein neues leben!,% comments which resets other comments
@@ -24,7 +50,7 @@
 },first slide=2}
 \begin{minted}{java}
 public static void main(String[] args) {
-   int i = 9;
+   int i = 12;
    char x = 'c';
    String k = "k";
    System.out.println(x + ": " + i);
