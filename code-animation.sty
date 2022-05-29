@@ -62,7 +62,7 @@
 % the initial comments marker
 \def\ca@comments@from{0}
 % #1 is a coordinate prefix to be used outside
-\newcommand\ca@AnimateCode[1][@]{\@bsphack% just to block spaces and stuff for sure
+\newcommand\ca@AnimateCode[1][@]{% just to block spaces and stuff for sure
 \ifcsname c@codeanim@#1@lc\endcsname\else
 \expandafter\newcount\csname c@codeanim@#1@lc\endcsname\fi
 % reset counter in any way!
@@ -86,21 +86,30 @@
 % TODO: support for mid-code highlights by literates! like @ as a marker?!
 \ca@DecodeHandouts
 \ca@DecodeAnimations
-\@Esphack}
+}
 
 % we make it so that any item is *command* :)
 \def\@AnimationCommands{%
+% TODO: get resets correct!
+% TODO: in handout: rest in iteration directly if below current (inverse?) mapping
+    \mode<all>{\def\ca@reset{\def\ca@comments@from{\@anim@on}}}%
+    \mode<handout>{\def\ca@reset{% directly reset
+        % if anim@on is below current:
+        \ifnum\@anim@on<\ca@MapFromHandout{\insertslidenumber}\relax
+            \xdef\ca@comments@from{\@anim@on}%
+        \else\def\ca@comments@from{\@anim@on}\fi%
+    }}%
     % the simple animation
     \def\ca@simple##1{\def\@anim{##1}}%
     % shift commentframe
-    \def\ca@resetsimple##1{\ca@simple{##1}\def\ca@comments@from{\@anim@on}}%
+    \def\ca@resetsimple##1{\ca@simple{##1}\ca@reset}%
     \def\ca@simpleothers##1:##2\@null{\def\@anim{##1}\def\ca@anim@otherhighlights{##2}}%
     \def\ca@comment##1:##2\@null{\def\@anim{##1}\def\@comment@text{##2}}%
-    \def\ca@resetcomment{\def\ca@comments@from{\@anim@on}\ca@comment}%
+    \def\ca@resetcomment{\ca@reset\ca@comment}%
     \def\ca@custom{%
         \def\Line####1{\def\@anim{####1}}%
         \def\Comment####1{\def\@comment@text{####1}}%
-        \def\Reset{\def\ca@comments@from{\@anim@on}}%
+        \def\Reset{\ca@reset}%
         \def\StoreAnimationTo####1{\xdef####1{\@anim@on}}%
         \def\StoreHandoutTo####1{\xdef####1{\ca@MapToHandout{\@anim@on}}}%
         \def\Location####1{\def\ca@anim@curentlocation{####1}}%
@@ -148,10 +157,10 @@
     \@AnimationCommands
     % clear it on the start
     \only<\ca@firstslide>{\def\ca@comments@from{0}}%
-    \foreach[count=\@anim@on from \ca@firstslide] \@animcode in \ca@onslide@list {
+    \foreach[count=\@anim@on from \ca@firstslide] \@animcode in \ca@onslide@list {%
         \expandafter\ca@DecodeAnimationCommand\@animcode\@empty\@empty\@null
-        \expandafter\protected@xdef\csname @\@anim@on @comment@text\endcsname{\@comment@text}
-        \expandafter\protected@xdef\csname @\@anim@on @comment@location\endcsname{\@anim}
+        \expandafter\protected@xdef\csname @\@anim@on @comment@text\endcsname{\@comment@text}%
+        \expandafter\protected@xdef\csname @\@anim@on @comment@location\endcsname{\@anim}%
         % takeover expanded (protection for comments)
         \protected@edef\@tmpargs{{\ca@comments@from}{\@anim}{\@comment@text}{\ca@anim@curentlocation}{\ca@anim@otherhighlights}}%
         \expandafter\ca@Only\@tmpargs
@@ -186,16 +195,8 @@
 % animate all visible ones
 % do not go down:
 % include '='
-\mode
-<all>%
-\edef\ca@Maximum{\the\numexpr\insertslidenumber-1\relax}%
-\mode
-<handout>%
-\def\ca@Maximum{\ca@MapFromHandout{\insertslidenumber}}%
-\mode
-<all>%
-% TODO: get resets correct!
-% TODO: in handout: rest in iteration directly if below current (inverse?) mapping
+\mode<all>{\edef\ca@Maximum{\the\numexpr\insertslidenumber-1\relax}}%
+\mode<handout>{\def\ca@Maximum{\the\numexpr\ca@MapFromHandout{\insertslidenumber}-1\relax}}%
 \ifnum\ca@comments@from>\ca@Maximum\else
 \foreach \@comment@on in {\ca@comments@from,...,\ca@Maximum} {
     \@ifundefined{@\@comment@on @comment@text}{}{%
