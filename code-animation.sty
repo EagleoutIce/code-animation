@@ -106,6 +106,9 @@
     \def\ca@resetcomment{\ca@reset\ca@comment}%
     \def\ca@custom{%
         \def\Line####1{\def\@anim{####1}}%
+        \def\NextLine{\RelativeLine1}%
+        \def\PreviousLine{\RelativeLine-1}%
+        \def\RelativeLine####1{\edef\@anim{\the\numexpr\old@anim+####1\relax}}%
         \def\Comment####1{\def\@comment@text{####1}}%
         \def\Reset{\ca@reset}%
         \def\StoreAnimationTo####1{\xdef####1{\@anim@on}}%
@@ -123,9 +126,10 @@
     \if#1/ \ca@comment#2\@null\else
     \if#1| \ca@resetcomment#2\@null\else
     \if#1* \ca@custom#2\else
+    \if#1+ \ca@simple{\the\numexpr\old@anim+1\relax}\else
     % else do it at a number:
         \ca@simple{#1#2}%
-    \fi\fi\fi\fi\fi
+    \fi\fi\fi\fi\fi\fi
 }
 % used for easier expandafter to lock the anim
 % we may globalize:
@@ -140,17 +144,16 @@
 % if it is not there, do not put it on the handout
 \def\ca@MapToHandout#1{\@ifundefined{ca@@map@#1@}{0}{\csname ca@@map@#1@\endcsname}}
 \def\ca@MapFromHandout#1{\@ifundefined{ca@@map@inv@#1@}{0}{\csname ca@@map@inv@#1@\endcsname}}
-% from | to
-\def\ca@make@mapping#1#2{\gappto\@ca@collector{\expandafter\def\csname ca@@map@#1@\endcsname{#2}%
-\expandafter\def\csname ca@@map@inv@#2@\endcsname{#1}}}
 \def\ca@DecodeHandouts{% just create the mappings
     % TODO: update this to use a custom '<from> -> <to>' syntax or so
     % TODO: explain how to use this if 1 is to be on 2-10 and 2 is to be on 4 only (by doing it extra)
     \gdef\@ca@collector{}%
     \foreach \@from/\@to in \ca@onhandout@list {%
         % we make this bidirectional to get comment ranges
-        % do not edef so that we can use macros here
-        \expandafter\expandafter\expandafter\ca@make@mapping\expandafter\expandafter\expandafter{\expandafter\@from\expandafter}\expandafter{\@to}
+        \xappto\@ca@collector{%
+            \noexpand\expandafter\noexpand\edef\noexpand\csname ca@@map@\@from @\endcsname{\@to}%
+            \noexpand\expandafter\noexpand\edef\noexpand\csname ca@@map@inv@\@to @\endcsname{\@from}%
+        }
     }%
     \@ca@collector% keep the definitions local, only the collector is global and
     % more easily reset than a potentially infinite map :D
@@ -162,7 +165,7 @@
     \@AnimationCommands
     % clear it on the start
     \only<\ca@firstslide>{\def\ca@comments@from{0}}%
-    \foreach[count=\@anim@on from \ca@firstslide] \@animcode in \ca@onslide@list {%
+    \foreach[count=\@anim@on from \ca@firstslide,remember=\@anim as \old@anim (initially 0)] \@animcode in \ca@onslide@list {%
         \expandafter\ca@DecodeAnimationCommand\@animcode\@empty\@empty\@null
         \expandafter\protected@xdef\csname @\@anim@on @comment@text\endcsname{\@comment@text}%
         \expandafter\protected@xdef\csname @\@anim@on @comment@location\endcsname{\@anim}%
