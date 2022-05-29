@@ -8,14 +8,15 @@
 % TODO: handout mode
 \begin{document}
 \begin{frame}[fragile]
-\CodeAnimationsNoFadeOut
-\AnimateCode{onslide={1,
-   /2: Nun ist \T{i = 9},
+\AnimateCode{onslide={1, % just a highlight
+   /2: Nun ist \T{i = 9}, % highlight with comment
    /3: Hat jemand einen Pinguin gesehen?,
-   /4: $3x^2$,.5,
+   /4: $3x^2$,
+   .5, % basic highlight which rests comments
    /2: Nun ist wieder \T{i = 9},
    /3: Pinguuuu,
-   4,.5%
+   4,
+   |5: Ein neues leben!% comments which resets other comments
 },first slide=2}
 \begin{minted}{java}
 public static void main(String[] args) {

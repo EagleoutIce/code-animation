@@ -85,14 +85,16 @@
     % shift commentframe
     \def\ca@resetsimple##1{\ca@simple{##1}\def\ca@comments@from{\@anim@on}}%
     \def\ca@comment##1:##2\@null{\def\@anim{##1}\def\@comment@text{##2}}%
+    \def\ca@resetcomment{\def\ca@comments@from{\@anim@on}\ca@comment}%
 }
 \def\ca@DecodeAnimationCommand#1#2\@null{%
     \let\@anim\@empty \let\@comment@text\@empty
     \if#1. \ca@resetsimple{#2}\else
     \if#1/ \ca@comment#2\@null\else
+    \if#1| \ca@resetcomment#2\@null\else
     % else do it at a number:
         \ca@simple{#1#2}%
-    \fi\fi
+    \fi\fi\fi
 }
 % used for easier expandafter to lock the anim
 \def\ca@Only#1#2#3{\only<\@anim@on>{\gdef\ca@anim@currentline{#2}\gdef\ca@anim@currentcomment{#3}% we may globalize:
