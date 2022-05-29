@@ -113,6 +113,8 @@
         \def\Reset{\ca@reset}%
         \def\StoreAnimationTo####1{\xdef####1{\@anim@on}}%
         \def\StoreHandoutTo####1{\xdef####1{\ca@MapToHandout{\@anim@on}}}%
+        \mode<all>{\let\StoreTo\StoreAnimationTo}%
+        \mode<handout>{\let\StoreTo\StoreHandoutTo}%
         \def\Location####1{\def\ca@anim@curentlocation{####1}}%
         \def\Others####1{\def\ca@anim@otherhighlights{####1}}%
         \relax
