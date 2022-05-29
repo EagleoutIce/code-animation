@@ -22,14 +22,21 @@
 % as they can not be nested, one storage is enough
 \def\ca@colormixin@suff{!15!lightgray}
 \let\ca@oldcolormixin\@empty
-\def\ca@fadeout@start{%
+\def\@ca@fadeout@start{%
 \let\ca@Mixin\ca@colormixin@env
 \let\ca@oldcolormixin\colorcurrentmixin
 \edef\colorcurrentmixin{\ca@colormixin@suff\colorcurrentmixin}\color{.}%
 }
+
 % guard to not close unnecessary
-\def\ca@fadeout@end{\ifx\ca@colormixin@env\ca@Mixin
+\def\@ca@fadeout@end{\ifx\ca@colormixin@env\ca@Mixin
 \let\colorcurrentmixin\ca@oldcolormixin\color{.}\fi\let\ca@Mixin\relax}%
+
+
+% TODO: include comments
+\def\CodeAnimationsNoFadeOut{\let\ca@fadeout@start\@empty \let\ca@fadeout@end\@empty}
+\def\CodeAnimationsWithFadeOut{\let\ca@fadeout@start\@ca@fadeout@start \let\ca@fadeout@end\@ca@fadeout@end}
+\CodeAnimationsWithFadeOut
 
 \def\ca@Strut{\vphantom{\sol@font@fs@normal\sol@styles@lst@basic\strut}}
 
@@ -99,7 +106,6 @@
         \expandafter\ca@DecodeAnimationCommand\@animcode\@empty\@empty\@null
         \expandafter\protected@xdef\csname @\@anim@on @comment@text\endcsname{\@comment@text}
         \expandafter\protected@xdef\csname @\@anim@on @comment@location\endcsname{\@anim}
-        \typeout{\@anim@on -> \@anim/\@comment@text}%
         \protected@edef\@tmpargs{{\ca@comments@from}{\@anim}{\@comment@text}}%
         \expandafter\ca@Only\@tmpargs
     }%
@@ -122,19 +128,16 @@
     % put a comment there:
     \node[ca@CommentNode] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ignorespaces\ca@anim@currentcomment};
 % animate all visible ones
-% \typeout{FROM: \ca@comments@from\space TO: \the\numexpr\insertslidenumber-\ca@firstslide}
-\typeout{ON: \insertslidenumber, DO: \ca@comments@from,...,\the\numexpr\insertslidenumber-1}
 % do not go down:
 \ifnum\ca@comments@from<\the\numexpr\insertslidenumber-1\relax
 \foreach \@comment@on in {\ca@comments@from,...,\the\numexpr\insertslidenumber-1} {
-    \typeout{Working on: \@comment@on (\csname @\@comment@on @comment@text\endcsname)}
     \@ifundefined{@\@comment@on @comment@text}{}{%
         \node[ca@CommentNode@out] at (ca@\ca@cdname-\csname @\@comment@on @comment@location\endcsname @end.east) {\ignorespaces\csname @\@comment@on @comment@text\endcsname};
     }
 }
 \fi
 \fi
-\node[above right] at(current page.south west) {\insertslidenumber};
+% \node[above right] at(current page.south west) {\insertslidenumber};
 \endtikzpicture}
 
 \newenvironment{AnimateCode}[2][@]{\begingroup
