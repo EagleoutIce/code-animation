@@ -13,6 +13,7 @@
 % TODO:
 \def\ca@lst@addToLiterate#1{\protected@edef\lst@literate{\unexpanded\expandafter{\lst@literate}\unexpanded{#1}}}
 \lst@Key{code-animations@add to literate}{}{\ca@lst@addToLiterate{#1}}
+% TODO: use those in the code so they are availble with the star option
 
 % TODO: redfine to kill that :D
 \def\ca@colormixin@env{colormixin}
@@ -129,7 +130,7 @@
 }
 
 \def\ca@Leftmark{\llap{\faAngleRight~}}
-\def\ca@Rightmark{\rlap{\!\faAngleLeft}}% currently there is a buffer :D
+\def\ca@Rightmark{\rlap{\faAngleLeft}}% currently there is a buffer :D
 \def\ca@start{start}\def\ca@end{end}
 % TODO: Botmark and stuff
 \tikzset{ca@CommentNode/.style={font=\sffamily\small\slshape,gray,right=3mm,yshift=.2mm},ca@CommentNode@out/.style={ca@CommentNode,font=\sffamily\footnotesize\slshape,lightgray}}
