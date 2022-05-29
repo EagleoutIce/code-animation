@@ -41,12 +41,12 @@
     \expandafter\ifnum\number\csname c@codeanim@#1@lc\endcsname=\ca@anim@currentline
     #2\else#3\fi\else#2\fi}
 
+% the initial buffer
+\def\ca@CommentBuffer{/}
 % #1 is a coordinate prefix to be used outside
 \newcommand\ca@AnimateCode[1][@]{%
 \ifcsname c@codeanim@#1@lc\endcsname\else
 \expandafter\newcount\csname c@codeanim@#1@lc\endcsname\fi
-% the comment buffer:
-\gdef\ca@CommentBuffer{/}%
 % reset counter in any way!
 \global\csname c@codeanim@#1@lc\endcsname0\relax
 % we appto locally to increment the current line counter
@@ -89,20 +89,24 @@
     \fi\fi
 }
 % used for easier expandafter to lock the anim
-\def\ca@Only#1#2#3{\only<\@anim@on>{\gdef\ca@anim@currentline{#1}\gdef\ca@anim@currentcomment{#2}% we may globalize:
-\expandafter\gdef\expandafter\ca@CommentBuffer\expandafter{\ca@CommentBuffer}}}
+\def\ca@Only#1#2#3{\only<\@anim@on>{\gdef\ca@anim@currentline{#2}\gdef\ca@anim@currentcomment{#3}% we may globalize:
+\gdef\ca@CommentBuffer{#1}}}
 \def\ca@DecodeAnimations{%
     \def\ca@anim@currentline{0}% default if none is active
     % store the old before we overwrite:
     \@ifundefined{@comment@text}{}{%
+        \typeout{Adding: \@comment@text}
         \ifx\@comment@text\@empty\else
             \expandafter\ca@ExtendsCommentBuffer\expandafter{\@comment@text}%
     \fi}
     \@AnimationCommands
+    % clear it on the start
+    \only<\ca@firstslide>{\gdef\ca@CommentBuffer{/}}%
     \foreach[count=\@anim@on from \ca@firstslide] \@animcode in \ca@onslide@list {
         \expandafter\ca@DecodeAnimationCommand\@animcode\@empty\@empty\@null
-        \expandafter\expandafter\expandafter\expandafter\expandafter\expandafter
-        \ca@Only\expandafter\expandafter\expandafter\expandafter\expandafter\expandafter{\expandafter\expandafter\expandafter\@anim\expandafter\expandafter\expandafter}\expandafter{\expandafter\@comment@text\expandafter}\expandafter{\ca@CommentBuffer}%
+        \expandafter\protected@xdef\csname @\@anim@on @comment@text\endcsname{\@comment@text}
+        \protected@edef\@tmpargs{{\csexpandonce{ca@CommentBuffer}}{\@anim}{\@comment@text}}%
+        \expandafter\ca@Only\@tmpargs
     }%
 }
 
