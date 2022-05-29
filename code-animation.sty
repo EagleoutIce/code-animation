@@ -45,6 +45,8 @@
 \newcommand\ca@AnimateCode[1][@]{%
 \ifcsname c@codeanim@#1@lc\endcsname\else
 \expandafter\newcount\csname c@codeanim@#1@lc\endcsname\fi
+% the comment buffer:
+\gdef\ca@CommentBuffer{/}%
 % reset counter in any way!
 \global\csname c@codeanim@#1@lc\endcsname0\relax
 % we appto locally to increment the current line counter
@@ -58,35 +60,47 @@
 }%
 % hook the start marker at the beginning:
 \appto\lsthk@EveryPar{%
-    \ca@InCurrentLineActive{#1}\relax\ca@fadeout@start
+    % using empty so it does not jump!
+    \ca@InCurrentLineActive{#1}\@empty\ca@fadeout@start
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
 }%
 % furthermore we want to configure some numbers with beamer animations!
-\ca@DecodeAnimations\relax
+\ca@DecodeAnimations
 % TODO: support for mid-code highlights by literates! like @ as a marker?!
 % TODO: support for end
 \def\ca@anim@curentlocation{start}%
 }
 
-% used for easier expandafter to lock the anim
-\def\ca@Only#1{\only<\@anim@on>{\global\def\ca@anim@currentline{#1}}}
 % we make it so that any item is *command* :)
 \def\@AnimationCommands{%
     % the simple animation
-    \def\ca@dot##1{\def\@anim{##1}}
+    \def\ca@simple##1{\def\@anim{##1}}%
+    % this one does reset all stored comments
+    \def\ca@resetsimple##1{\ca@simple{##1}\gdef\ca@CommentBuffer{/}}%
+    \def\ca@comment##1:##2\@null{\def\@anim{##1}\gdef\@comment@text{##2}}%
 }
-\def\ca@DecodeAnimationCommand#1#2\@null{
-    \if#1. \ca@dot{#2}\else
+\def\ca@ExtendsCommentBuffer#1{\gappto\ca@CommentBuffer{,\the\csname c@codeanim@#1@lc\endcsname/#1}}
+\def\ca@DecodeAnimationCommand#1#2\@null{%
+    \let\@anim\@empty \let\@comment@text\@empty
+    \if#1. \ca@resetsimple{#2}\else
+    \if#1/ \ca@comment#2\@null\else
     % else do it at a number:
-        \ca@dot{#1#2}
-    \fi
+        \ca@simple{#1#2}%
+    \fi\fi
 }
+% used for easier expandafter to lock the anim
+\def\ca@Only#1#2{\only<\@anim@on>{\global\def\ca@anim@currentline{#1}\global\def\ca@anim@currentcomment{#2}}}
 \def\ca@DecodeAnimations{%
     \def\ca@anim@currentline{0}% default if none is active
+    % store the old before we overwrite:
+    \@ifundefined{@comment@text}{}{%
+        \ifx\@comment@text\@empty\else
+            \expandafter\ca@ExtendsCommentBuffer\expandafter{\@comment@text}%
+    \fi}
     \@AnimationCommands
     \foreach[count=\@anim@on from \ca@firstslide] \@animcode in \ca@onslide@list {
         \expandafter\ca@DecodeAnimationCommand\@animcode\@null
-        \expandafter\ca@Only\expandafter{\@anim}%
+        \expandafter\expandafter\expandafter\ca@Only\expandafter\expandafter\expandafter{\expandafter\@anim\expandafter}\expandafter{\@comment@text}%
     }%
 }
 
@@ -98,12 +112,16 @@
 
 \def\ca@Leftmark{\llap{\faAngleRight~}}
 \def\ca@Rightmark{\rlap{~\faAngleLeft}}
+\tikzset{ca@CommentNode/.style={font=\sffamily\small\slshape,gray,right=3mm,yshift=.2mm},ca@CommentNode@out/.style={ca@CommentNode,lightgray}}
 \def\ca@DoCodeAnimation{%
 \tikzpicture[overlay,remember picture]
 % make the line markers :)
 \ifnum\ca@anim@currentline>0
     \node[left] at (ca@\ca@cdname-\ca@anim@currentline @\ca@anim@curentlocation.east) {\ca@Leftmark};
+    % put a comment there:
+    \node[ca@CommentNode] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ignorespaces\ca@anim@currentcomment};
 \fi
+\node[yshift=-1cm] at(current page.center) {Buffer: \ca@CommentBuffer};
 \endtikzpicture}
 
 \newenvironment{AnimateCode}[2][@]{\begingroup
