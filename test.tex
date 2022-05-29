@@ -16,9 +16,9 @@
    /2: Nun ist wieder \T{i = 9}, /3: Pinguuuu, 4,
    |5: Ein neues leben!,% comments which resets other comments
    3,3, 0, % Dopplungen sind kein Problem, 0 shows full code
-   *\Line{4}\Comment{Walter}\Location{end},% komplett frei :D
+   *\Line{4}\Comment{Walter}\Location{end}\StoreAnimationTo\Walter\StoreHandoutTo\WalterHandout,% komplett frei :D
    3, .4
-},first slide=2}
+},handout={5/2,15/3},first slide=2}
 \begin{minted}{java}
 public static void main(String[] args) {
    int i = 9;
@@ -28,6 +28,7 @@ public static void main(String[] args) {
 }
 \end{minted}
 \endAnimateCode
+Walter kommt (nur bei Animationen natürlich) auf Slide \Walter. Sein Handout-Mapping ist Folie \WalterHandout. % TODO: improve handling of symbolic stuff
 \end{frame}
 
 \begin{frame}
