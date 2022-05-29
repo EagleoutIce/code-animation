@@ -34,12 +34,19 @@
 \def\ca@Strut{\vphantom{\sol@font@fs@normal\sol@styles@lst@basic\strut}}
 
 % TODO: use firstoftwo and second of two
-\def\ca@InCurrentLine#1#2#3{\expandafter\ifnum\number\csname c@codeanim@#1@lc\endcsname=\ca@anim@currentline#2\else#3\fi}
+\def\ca@InCurrentLineActive#1#2#3{%
+    % AND are we in animation Run? otherwise always
+    \ifnum\ca@anim@currentline>0#2
+    % are we in the current line?
+    \expandafter\ifnum\number\csname c@codeanim@#1@lc\endcsname=\ca@anim@currentline
+    #2\else#3\fi\else#2\fi}
 
 % #1 is a coordinate prefix to be used outside
 \newcommand\ca@AnimateCode[1][@]{%
 \ifcsname c@codeanim@#1@lc\endcsname\else
 \expandafter\newcount\csname c@codeanim@#1@lc\endcsname\fi
+% reset counter in any way!
+\global\csname c@codeanim@#1@lc\endcsname0\relax
 % we appto locally to increment the current line counter
 \appto\lsthk@OnNewLine{%
     % get the end marker for this line
@@ -51,14 +58,23 @@
 }%
 % hook the start marker at the beginning:
 \appto\lsthk@EveryPar{%
-    \ca@InCurrentLine{#1}\relax\ca@fadeout@start
+    \ca@InCurrentLineActive{#1}\relax\ca@fadeout@start
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
-}
+}%
 % furthermore we want to configure some numbers with beamer animations!
-% TODO:
-\def\ca@anim@currentline{2}%
+\ca@DecodeAnimations\relax
 % TODO: support for mid-code highlights by literates! like @ as a marker?!
-\def\ca@anim@curentlocation{start}
+% TODO: support for end
+\def\ca@anim@curentlocation{start}%
+}
+
+% used for easier expandafter to lock the anim
+\def\ca@Only#1{\only<\@anim@on>{\global\def\ca@anim@currentline{#1}}}
+\def\ca@DecodeAnimations{%
+    \def\ca@anim@currentline{0}% default if none is active
+    \foreach[count=\@anim@on from \ca@firstslide] \@anim in \ca@onslide@list {
+        \expandafter\ca@Only\expandafter{\@anim}%
+    }%
 }
 
 \pgfqkeys{/ca@animate@code}{%
@@ -71,7 +87,10 @@
 \def\ca@Rightmark{\rlap{~\faAngleLeft}}
 \def\ca@DoCodeAnimation{%
 \tikzpicture[overlay,remember picture]
-\node[left] at (ca@\ca@cdname-2@start.east) {\ca@Leftmark};
+% make the line markers :)
+\ifnum\ca@anim@currentline>0
+    \node[left] at (ca@\ca@cdname-\ca@anim@currentline @\ca@anim@curentlocation.east) {\ca@Leftmark};
+\fi
 \endtikzpicture}
 
 \newenvironment{AnimateCode}[2][@]{\begingroup

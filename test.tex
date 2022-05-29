@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass{beamer}
 \usepackage{code-animation}
 
 \errorcontextlines9999
@@ -6,7 +6,8 @@
 \solsetmintedstyle{plain}
 
 \begin{document}
-\AnimateCode{}
+\begin{frame}[fragile]
+\AnimateCode{onslide={1,2,3,4,3,2,3,3,4},first slide=2}
 \begin{minted}{java}
 public static void main(String[] args) {
    int i = 9;
@@ -15,7 +16,9 @@ public static void main(String[] args) {
 }
 \end{minted}
 \endAnimateCode
+\end{frame}
 
+\begin{frame}[fragile]
 \begin{minted}{java}
 public static void main(String[] args) {
    int i = 9;
@@ -23,4 +26,5 @@ public static void main(String[] args) {
    System.out.println(x + ": " + i);
 }
 \end{minted}
+\end{frame}
 \end{document}
