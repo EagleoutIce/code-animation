@@ -119,7 +119,7 @@
 }
 % used for easier expandafter to lock the anim
 % we may globalize:
-\def\ca@Only#1#2#3#4#5{\only<\@anim@on>{% this is the activator
+\def\ca@Only#1#2#3#4#5{\only<\@anim@on|handout:0>{% this is the activator
     \gdef\ca@comments@from{#1}% re-account comments from this id
     \gdef\ca@anim@currentline{#2}%
     \gdef\ca@anim@currentcomment{#3}%
