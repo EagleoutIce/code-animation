@@ -41,8 +41,8 @@
     \expandafter\ifnum\number\csname c@codeanim@#1@lc\endcsname=\ca@anim@currentline
     #2\else#3\fi\else#2\fi}
 
-% the initial buffer
-\def\ca@CommentBuffer{/}
+% the initial comments marker
+\def\ca@comments@from{0}
 % #1 is a coordinate prefix to be used outside
 \newcommand\ca@AnimateCode[1][@]{%
 \ifcsname c@codeanim@#1@lc\endcsname\else
@@ -75,37 +75,32 @@
 \def\@AnimationCommands{%
     % the simple animation
     \def\ca@simple##1{\def\@anim{##1}}%
-    % this one does reset all stored comments
-    \def\ca@resetsimple##1{\ca@simple{##1}\def\ca@CommentBuffer{x/}}%
+    % shift commentframe
+    \def\ca@resetsimple##1{\ca@simple{##1}\def\ca@comments@from{\@anim@on}}%
     \def\ca@comment##1:##2\@null{\def\@anim{##1}\def\@comment@text{##2}}%
 }
-\def\ca@ExtendsCommentBuffer#1{\gappto\ca@CommentBuffer{,\the\csname c@codeanim@#1@lc\endcsname/#1}}
 \def\ca@DecodeAnimationCommand#1#2\@null{%
     \let\@anim\@empty \let\@comment@text\@empty
-    \if#1. \typeout{DOT: #1#2}\ca@resetsimple{#2}\else
-    \if#1/ \typeout{SLASH: #1#2}\ca@comment#2\@null\else
+    \if#1. \ca@resetsimple{#2}\else
+    \if#1/ \ca@comment#2\@null\else
     % else do it at a number:
-        \typeout{NONE: #1#2} \ca@simple{#1#2}%
+        \ca@simple{#1#2}%
     \fi\fi
 }
 % used for easier expandafter to lock the anim
 \def\ca@Only#1#2#3{\only<\@anim@on>{\gdef\ca@anim@currentline{#2}\gdef\ca@anim@currentcomment{#3}% we may globalize:
-\gdef\ca@CommentBuffer{#1}}}
+\gdef\ca@comments@from{#1}}}
 \def\ca@DecodeAnimations{%
     \def\ca@anim@currentline{0}% default if none is active
-    % store the old before we overwrite:
-    \@ifundefined{@comment@text}{}{%
-        \typeout{Adding: \@comment@text}
-        \ifx\@comment@text\@empty\else
-            \expandafter\ca@ExtendsCommentBuffer\expandafter{\@comment@text}%
-    \fi}
     \@AnimationCommands
     % clear it on the start
-    \only<\ca@firstslide>{\gdef\ca@CommentBuffer{/}}%
+    \only<\ca@firstslide>{\def\ca@comments@from{0}}%
     \foreach[count=\@anim@on from \ca@firstslide] \@animcode in \ca@onslide@list {
         \expandafter\ca@DecodeAnimationCommand\@animcode\@empty\@empty\@null
         \expandafter\protected@xdef\csname @\@anim@on @comment@text\endcsname{\@comment@text}
-        \protected@edef\@tmpargs{{\csexpandonce{ca@CommentBuffer}}{\@anim}{\@comment@text}}%
+        \expandafter\protected@xdef\csname @\@anim@on @comment@location\endcsname{\@anim}
+        \typeout{\@anim@on -> \@anim/\@comment@text}%
+        \protected@edef\@tmpargs{{\ca@comments@from}{\@anim}{\@comment@text}}%
         \expandafter\ca@Only\@tmpargs
     }%
 }
@@ -118,7 +113,7 @@
 
 \def\ca@Leftmark{\llap{\faAngleRight~}}
 \def\ca@Rightmark{\rlap{~\faAngleLeft}}
-\tikzset{ca@CommentNode/.style={font=\sffamily\small\slshape,gray,right=3mm,yshift=.2mm},ca@CommentNode@out/.style={ca@CommentNode,lightgray}}
+\tikzset{ca@CommentNode/.style={font=\sffamily\small\slshape,gray,right=3mm,yshift=.2mm},ca@CommentNode@out/.style={ca@CommentNode,font=\sffamily\footnotesize\slshape,lightgray}}
 \def\ca@DoCodeAnimation{%
 \tikzpicture[overlay,remember picture]
 % make the line markers :)
@@ -126,8 +121,20 @@
     \node[left] at (ca@\ca@cdname-\ca@anim@currentline @\ca@anim@curentlocation.east) {\ca@Leftmark};
     % put a comment there:
     \node[ca@CommentNode] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ignorespaces\ca@anim@currentcomment};
+% animate all visible ones
+% \typeout{FROM: \ca@comments@from\space TO: \the\numexpr\insertslidenumber-\ca@firstslide}
+\typeout{ON: \insertslidenumber, DO: \ca@comments@from,...,\the\numexpr\insertslidenumber-1}
+% do not go down:
+\ifnum\ca@comments@from<\the\numexpr\insertslidenumber-1\relax
+\foreach \@comment@on in {\ca@comments@from,...,\the\numexpr\insertslidenumber-1} {
+    \typeout{Working on: \@comment@on (\csname @\@comment@on @comment@text\endcsname)}
+    \@ifundefined{@\@comment@on @comment@text}{}{%
+        \node[ca@CommentNode@out] at (ca@\ca@cdname-\csname @\@comment@on @comment@location\endcsname @end.east) {\ignorespaces\csname @\@comment@on @comment@text\endcsname};
+    }
+}
 \fi
-\node[yshift=-1cm] at(current page.center) {Buffer: \ca@CommentBuffer};
+\fi
+\node[above right] at(current page.south west) {\insertslidenumber};
 \endtikzpicture}
 
 \newenvironment{AnimateCode}[2][@]{\begingroup
