@@ -1,3 +1,3 @@
-# fancy-underline
+# code-animation
 
-Simple LaTeX-Package which uses [`soul`](https://www.ctan.org/pkg/soul), [`ulem`](https://www.ctan.org/pkg/ulem) and [`contour`](https://www.ctan.org/pkg/contour) to get a nice html-like underline which is capable of line breaking.
+A LaTeX Package to ease animation in listings (with beamer) and the [sopra-collection](https://github.com/EagleoutIce/sopra-collection).
