@@ -119,11 +119,13 @@
         \def\RelativeLine####1{\edef\@anim{\the\numexpr\old@anim+####1\relax}}%
         \def\Comment####1{\def\@comment@text{####1}}%
         \def\Reset{\ca@reset}%
+        \def\Forever{\edef\@anim@on{\@anim@on-}}%
         \def\StoreAnimationTo####1{\ca@Record####1{\@anim@on}}%
         \def\StoreHandoutTo####1{\ca@Record####1{\ca@MapToHandout{\@anim@on}}}%
         \mode<all>{\let\StoreTo\StoreAnimationTo}%
         \mode<handout>{\let\StoreTo\StoreHandoutTo}%
         \def\Location####1{\def\ca@anim@curentlocation{####1}}%
+        \def\NoLocation{\let\ca@anim@curentlocation\@empty}%
         \def\Others####1{\def\ca@anim@otherhighlights{####1}}%
     }%
 }
