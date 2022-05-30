@@ -1,4 +1,4 @@
-\documentclass[handout]{beamer}
+\documentclass{beamer}
 \usepackage{code-animation}
 
 % TODO: keep ghost markers for recursion (similar to comments)
@@ -7,7 +7,7 @@
 \errorcontextlines9999
 \usepackage[encoding, defaultfont, fakeminted]{sopra-listings}
 \solsetmintedstyle{plain}
-
+% TODO: work with animations?
 \begin{document}
 % \CodeAnimationsNoFadeOut
 \begin{frame}[fragile]
@@ -22,14 +22,14 @@
    3,3, 0, % Dopplungen sind kein Problem, 0 shows full code
    *\Line{4}\Comment{Walter}\Location{end}\StoreAnimationTo\WalterAnim\StoreHandoutTo\WalterHandout\StoreTo\Walter,% komplett frei :D
    3, .4
-},handout={5/2,\CodeAnimGet{WalterAnim}/3},first slide=2}% CodeAnimGet can be used pre definition
+},handout={8/2,\CodeAnimGet{WalterAnim}/3},first slide=5}% CodeAnimGet can be used pre definition
 \begin{minted}{java}
-public static void main(String[] args) {
-   int i = 9;
-   char x = 'c';
-   String k = "k";
-   System.out.println(x + ": " + i);
-}
+!*\onslide<2->*!public static void main(String[] args) {
+!*\onslide<3->*!   int i = 9;
+!*\onslide<3->*!   char x = 'c';
+!*\onslide<3->*!   String k = "k";
+!*\onslide<4->*!   System.out.println(x + ": " + i);
+!*\onslide<2->*!}
 \end{minted}
 \endAnimateCode
 Walter kommt (nur bei Animationen natürlich) auf Slide \WalterAnim~(\CodeAnimGet{WalterAnim}). Sein Handout-Mapping ist Folie \WalterHandout~(\CodeAnimGet{WalterHandout}). Das Auto-Mapping ist \Walter~(\CodeAnimGet{Walter}). % TODO: improve handling of symbolic stuff

@@ -73,13 +73,13 @@
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @end}{\ca@Strut}%
     % step the line id counter
     \global\advance\csname c@codeanim@#1@lc\endcsname by1\relax
-    % done! no do the fadeout
-    \ca@fadeout@end % will automatically hide if not in env
+    % done!
 }%
 % hook the start marker at the beginning:
-\appto\lsthk@EveryPar{%
+\appto\lsthk@Output{\ca@InCurrentLineActive{#1}\@empty{\ca@InOtherLineActive{#1}\@empty{\ca@fadeout@start}}\relax}
+\appto\lsthk@PostOutput{\ca@fadeout@end}% will automatically hide if not in env
+\appto\lsthk@EveryPar{% we do not do this multiple to be safe with markers
     % using empty so it does not jump!
-    \ca@InCurrentLineActive{#1}\@empty{\ca@InOtherLineActive{#1}\@empty{\ca@fadeout@start}}\relax
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
 }%
 % furthermore we want to configure some numbers with beamer animations!
