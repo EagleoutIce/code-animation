@@ -27,13 +27,13 @@
 \def\@ca@@fadeout@start{%
 \let\ca@Mixin\ca@colormixin@env
 \let\ca@oldcolormixin\colorcurrentmixin
-\edef\colorcurrentmixin{\ca@colormixin@suff\colorcurrentmixin}\color{.}%
+\edef\colorcurrentmixin{\ca@colormixin@suff\colorcurrentmixin}\@declaredcolor{.}%
 }
 \def\@ca@fadeout@start#1{\ca@InCurrentLineActive{#1}\@empty{\ca@InOtherLineActive{#1}\@empty{\@ca@@fadeout@start}}\relax}
 
 % guard to not close unnecessary
 \def\@ca@fadeout@end{\ifx\ca@colormixin@env\ca@Mixin
-\let\colorcurrentmixin\ca@oldcolormixin\color{.}\fi\let\ca@Mixin\relax}%
+\let\colorcurrentmixin\ca@oldcolormixin\@declaredcolor{.}\fi\let\ca@Mixin\relax}%
 
 
 % TODO: include comments
