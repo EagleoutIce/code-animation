@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[handout]{beamer}
 \usepackage{code-animation}
 
 % TODO: keep ghost markers for recursion (similar to comments)
@@ -22,7 +22,7 @@
    3,3, 0, % Dopplungen sind kein Problem, 0 shows full code
    *\Line{4}\Comment{Walter}\Location{end}\StoreAnimationTo\WalterAnim\StoreHandoutTo\WalterHandout\StoreTo\Walter,% komplett frei :D
    3, .4
-},handout={5/2,18/3},first slide=2}
+},handout={5/2,\CodeAnimGet{WalterAnim}/3},first slide=2}% CodeAnimGet can be used pre definition
 \begin{minted}{java}
 public static void main(String[] args) {
    int i = 9;
@@ -32,7 +32,7 @@ public static void main(String[] args) {
 }
 \end{minted}
 \endAnimateCode
-Walter kommt (nur bei Animationen natürlich) auf Slide \WalterAnim. Sein Handout-Mapping ist Folie \WalterHandout. Das Auto-Mapping ist \Walter. % TODO: improve handling of symbolic stuff
+Walter kommt (nur bei Animationen natürlich) auf Slide \WalterAnim~(\CodeAnimGet{WalterAnim}). Sein Handout-Mapping ist Folie \WalterHandout~(\CodeAnimGet{WalterHandout}). Das Auto-Mapping ist \Walter~(\CodeAnimGet{Walter}). % TODO: improve handling of symbolic stuff
 \end{frame}
 
 \begin{frame}
