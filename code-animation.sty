@@ -22,7 +22,9 @@
 
 % i do not use groups as this has problems with lst
 % as they can not be nested, one storage is enough
+\def\SetCodeAnimationFadeOutMixin#1{\def\ca@colormixin@suff{#1}}
 \def\ca@colormixin@suff{!15!lightgray}
+
 \let\ca@oldcolormixin\@empty
 \def\@ca@@fadeout@start{%
 \let\ca@Mixin\ca@colormixin@env
