@@ -89,6 +89,8 @@
 }
 
 % we make it so that any item is *command* :)
+\def\ca@Record#1#2{\immediate\protected@write\@auxout{}{\protect\def\protect#1{#2}}\xdef#1{#2}}
+\def\CodeAnimGet#1{\@ifundefined{#1}{0}{\csname#1\endcsname}}
 \def\@AnimationCommands{%
     \mode<all>{\def\ca@reset{\def\ca@comments@from{\@anim@on}}}%
     \mode<handout>{\def\ca@reset{% directly reset
@@ -111,8 +113,8 @@
         \def\RelativeLine####1{\edef\@anim{\the\numexpr\old@anim+####1\relax}}%
         \def\Comment####1{\def\@comment@text{####1}}%
         \def\Reset{\ca@reset}%
-        \def\StoreAnimationTo####1{\xdef####1{\@anim@on}}%
-        \def\StoreHandoutTo####1{\xdef####1{\ca@MapToHandout{\@anim@on}}}%
+        \def\StoreAnimationTo####1{\ca@Record####1{\@anim@on}}%
+        \def\StoreHandoutTo####1{\ca@Record####1{\ca@MapToHandout{\@anim@on}}}%
         \mode<all>{\let\StoreTo\StoreAnimationTo}%
         \mode<handout>{\let\StoreTo\StoreHandoutTo}%
         \def\Location####1{\def\ca@anim@curentlocation{####1}}%
