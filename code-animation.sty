@@ -54,7 +54,7 @@
 \newif\if@ca@@active@found@
 \def\ca@InOtherLineActive#1#2#3{%
     \global\@ca@@active@found@false
-    \foreach\k in \ca@anim@otherhighlights{%
+    \foreach\k in \ca@anim@otherhighlights {% TODO: Speed this up heavily by having macros and check for their existence
         \ifnum\k=\number\csname c@codeanim@#1@lc\endcsname\relax \global\@ca@@active@found@true\breakforeach\fi
     }%
     \if@ca@@active@found@#2\else#3\fi% no groups :)
@@ -106,10 +106,11 @@
     \def\ca@simple##1{\def\@anim{##1}}%
     % shift commentframe
     \def\ca@resetsimple##1{\ca@simple{##1}\ca@reset}%
-    \def\ca@simpleothers##1:##2\@null{\def\@anim{##1}\def\ca@anim@otherhighlights{##2}}%
+    \def\ca@simpleothers##1:##2\@null{\def\@anim{##1}\def\ca@anim@otherhighlights##2}% note: has to be given in braces!
+    \def\ca@othersonly{\let\ca@anim@curentlocation\@empty\ca@simpleothers}%
     \def\ca@comment##1:##2\@null{\def\@anim{##1}\def\@comment@text{##2}}%
     \def\ca@resetcomment{\ca@reset\ca@comment}%
-    \def\ca@custom{%
+    \def\ca@custom{% TODO: unify so others use readable syntax as well!
         \def\Line####1{\def\@anim{####1}}%
         \def\NextLine{\RelativeLine1}%
         \def\PreviousLine{\RelativeLine-1}%
@@ -130,13 +131,14 @@
     \def\ca@anim@curentlocation{start}% default value(s)
     \if#1. \ca@resetsimple{#2}\else
     \if#1: \ca@simpleothers#2\@null\else
+    \if#1o \ca@othersonly#2\@null\else
     \if#1/ \ca@comment#2\@null\else
     \if#1| \ca@resetcomment#2\@null\else
     \if#1* \ca@custom#2\else
     \if#1+ \ca@simple{\the\numexpr\old@anim+1\relax}\else
     % else do it at a number:
         \ca@simple{#1#2}%
-    \fi\fi\fi\fi\fi\fi
+    \fi\fi\fi\fi\fi\fi\fi
 }
 % used for easier expandafter to lock the anim
 % we may globalize:
@@ -202,9 +204,10 @@
     \node[left] at (ca@\ca@cdname-\ca@anim@currentline @start.west) {\ca@Leftmark};
 \else\ifx\ca@anim@curentlocation\ca@end
     \node[right] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ca@Rightmark};
+\else\ifx\ca@anim@curentlocation\@empty% do nothing in that case
 \else % TODO: use botmark!
     \node[right] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ca@Rightmark};
-\fi\fi
+\fi\fi\fi
 \fi % i want comments with my zero :)
     % put a comment there:
     \node[ca@CommentNode] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ignorespaces\ca@anim@currentcomment};
