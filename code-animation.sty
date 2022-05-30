@@ -35,7 +35,7 @@
 
 % guard to not close unnecessary
 \def\@ca@fadeout@end{\ifx\ca@colormixin@env\ca@Mixin
-\let\colorcurrentmixin\ca@oldcolormixin\@declaredcolor{.}\fi\let\ca@Mixin\relax}%
+\let\colorcurrentmixin\ca@oldcolormixin\@declaredcolor{.}\fi\let\ca@Mixin\relax}
 
 
 % TODO: include comments
@@ -102,7 +102,7 @@
         % if anim@on is below current:
         \ifnum\@anim@on<\ca@MapFromHandout{\insertslidenumber}\relax
             \xdef\ca@comments@from{\@anim@on}%
-        \else\def\ca@comments@from{\@anim@on}\fi%
+        \else\def\ca@comments@from{\@anim@on}\fi
     }}%
     % the simple animation
     \def\ca@simple##1{\def\@anim{##1}}%
@@ -125,7 +125,6 @@
         \mode<handout>{\let\StoreTo\StoreHandoutTo}%
         \def\Location####1{\def\ca@anim@curentlocation{####1}}%
         \def\Others####1{\def\ca@anim@otherhighlights{####1}}%
-        \relax
     }%
 }
 % TODO: optional arg for all for custom commands?
@@ -165,7 +164,7 @@
         \xappto\@ca@collector{%
             \noexpand\expandafter\noexpand\edef\noexpand\csname ca@@map@\@from @\endcsname{\@to}%
             \noexpand\expandafter\noexpand\edef\noexpand\csname ca@@map@inv@\@to @\endcsname{\@from}%
-        }
+        }%
     }%
     \@ca@collector% keep the definitions local, only the collector is global and
     % more easily reset than a potentially infinite map :D
@@ -183,7 +182,7 @@
         \expandafter\protected@xdef\csname @\@anim@on @comment@location\endcsname{\@anim}%
         % takeover expanded (protection for comments)
         \protected@edef\@tmpargs{{\ca@comments@from}{\@anim}{\@comment@text}{\ca@anim@curentlocation}{\ca@anim@otherhighlights}}%
-        \expandafter\ca@Only\@tmpargs
+        \expandafter\ca@Only\@tmpargs\relax
     }%
 }
 
@@ -200,9 +199,9 @@
 % TODO: Botmark and stuff
 \tikzset{ca@CommentNode/.style={font=\sffamily\small\slshape,gray,right=3mm,yshift=.2mm},ca@CommentNode@out/.style={ca@CommentNode,font=\sffamily\footnotesize\slshape,lightgray}}
 \def\ca@DoCodeAnimation{%
-\tikzpicture[overlay,remember picture]
+\tikzpicture[overlay,remember picture]%
 % make the line markers :)
-\ifnum\ca@anim@currentline>0
+\ifnum\ca@anim@currentline>0 %
 \ifx\ca@anim@curentlocation\ca@start
     \node[left] at (ca@\ca@cdname-\ca@anim@currentline @start.west) {\ca@Leftmark};
 \else\ifx\ca@anim@curentlocation\ca@end
@@ -214,18 +213,17 @@
 \fi % i want comments with my zero :)
     % put a comment there:
     \node[ca@CommentNode] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ignorespaces\ca@anim@currentcomment};
-
 % animate all visible ones
 % do not go down:
 % include '='
 \mode<all>{\edef\ca@Maximum{\the\numexpr\insertslidenumber-1\relax}}%
 \mode<handout>{\def\ca@Maximum{\the\numexpr\ca@MapFromHandout{\insertslidenumber}-1\relax}}%
 \ifnum\ca@comments@from>\ca@Maximum\else
-\foreach \@comment@on in {\ca@comments@from,...,\ca@Maximum} {
+\foreach \@comment@on in {\ca@comments@from,...,\ca@Maximum} {%
     \@ifundefined{@\@comment@on @comment@text}{}{%
         \node[ca@CommentNode@out] at (ca@\ca@cdname-\csname @\@comment@on @comment@location\endcsname @end.east) {\ignorespaces\csname @\@comment@on @comment@text\endcsname};
-    }
-}
+    }%
+}%
 \fi
 % \node[above right] at(current page.south west) {\insertslidenumber};
 \endtikzpicture}
