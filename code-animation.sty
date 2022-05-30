@@ -24,11 +24,12 @@
 % as they can not be nested, one storage is enough
 \def\ca@colormixin@suff{!15!lightgray}
 \let\ca@oldcolormixin\@empty
-\def\@ca@fadeout@start{%
+\def\@ca@@fadeout@start{%
 \let\ca@Mixin\ca@colormixin@env
 \let\ca@oldcolormixin\colorcurrentmixin
 \edef\colorcurrentmixin{\ca@colormixin@suff\colorcurrentmixin}\color{.}%
 }
+\def\@ca@fadeout@start#1{\ca@InCurrentLineActive{#1}\@empty{\ca@InOtherLineActive{#1}\@empty{\@ca@@fadeout@start}}\relax}
 
 % guard to not close unnecessary
 \def\@ca@fadeout@end{\ifx\ca@colormixin@env\ca@Mixin
@@ -36,7 +37,7 @@
 
 
 % TODO: include comments
-\def\CodeAnimationsNoFadeOut{\let\ca@fadeout@start\@empty \let\ca@fadeout@end\@empty}
+\def\CodeAnimationsNoFadeOut{\let\ca@fadeout@start\@gobble \let\ca@fadeout@end\@empty}
 \def\CodeAnimationsWithFadeOut{\let\ca@fadeout@start\@ca@fadeout@start \let\ca@fadeout@end\@ca@fadeout@end}
 \CodeAnimationsWithFadeOut
 
@@ -76,7 +77,7 @@
     % done!
 }%
 % hook the start marker at the beginning:
-\appto\lsthk@Output{\ca@InCurrentLineActive{#1}\@empty{\ca@InOtherLineActive{#1}\@empty{\ca@fadeout@start}}\relax}
+\appto\lsthk@Output{\ca@fadeout@start{#1}}
 \appto\lsthk@PostOutput{\ca@fadeout@end}% will automatically hide if not in env
 \appto\lsthk@EveryPar{% we do not do this multiple to be safe with markers
     % using empty so it does not jump!
