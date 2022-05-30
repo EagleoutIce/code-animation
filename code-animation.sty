@@ -75,10 +75,12 @@
     % step the line id counter
     \global\advance\csname c@codeanim@#1@lc\endcsname by1\relax
     % done!
+    \ca@fadeout@end
 }%
 % hook the start marker at the beginning:
-\appto\lsthk@Output{\ca@fadeout@start{#1}}
-\appto\lsthk@PostOutput{\ca@fadeout@end}% will automatically hide if not in env
+% TODO: maybe embed them just around escapings?
+\preto\lst@OutputToken{\ca@fadeout@start{#1}}% box to be in the same group
+\appto\lst@OutputToken{\ca@fadeout@end}% will automatically hide if not in env
 \appto\lsthk@EveryPar{% we do not do this multiple to be safe with markers
     % using empty so it does not jump!
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
