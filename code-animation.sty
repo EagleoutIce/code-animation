@@ -89,13 +89,13 @@
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
 }%
 % #1 allows for horiz shift
-\newcommand\AnimLoc[2][0pt]{\rlap{\hspace*{##1}\tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @##2}{\ca@Strut}}}%
+\newcommand\AnimLoc[2][0pt]{\rlap{\hspace*{##1}\tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @##2}{\ca@Strut}}\expandafter\xdef\csname CodeAnim#1-##2\endcsname{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @##2}}%
 % furthermore we want to configure some numbers with beamer animations!
 % TODO: support for mid-code highlights by literates! like @ as a marker?!
 \ca@DecodeHandouts
 \ca@DecodeAnimations
 }
-
+\newcommand\GetAnimLoc[2][@]{\csname CodeAnim#1-#2\endcsname}
 % we make it so that any item is *command* :)
 \def\ca@Record#1#2{\immediate\protected@write\@auxout{}{\protect\def\protect#1{#2}}\xdef#1{#2}}
 \def\CodeAnimGet#1{\@ifundefined{#1}{0}{\csname#1\endcsname}}
