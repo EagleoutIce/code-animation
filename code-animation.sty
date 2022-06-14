@@ -143,9 +143,14 @@
     \if#1| \ca@resetcomment#2\@null\else
     \if#1* \ca@custom#2\else
     \if#1+ \ca@simple{\the\numexpr\old@anim+1\relax}\else
+    % use the last one! and keep it in memory
+    \if#1- \let\@animcode\@animcode@last\expandafter\ca@DecodeAnimationCommand\@animcode@last\@empty\@empty\@null\else
     % else do it at a number:
         \ca@simple{#1#2}%
-    \fi\fi\fi\fi\fi\fi\fi
+    \fi\fi\fi\fi\fi\fi\fi\fi
+    \if#1- \relax\else % minus is never a last!
+        \global\let\@animcode@last\@animcode
+    \fi
 }
 % used for easier expandafter to lock the anim
 % we may globalize:
