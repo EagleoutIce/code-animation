@@ -73,6 +73,7 @@
 % we appto locally to increment the current line counter
 \appto\lsthk@OnNewLine{%
     % get the end marker for this line
+    % TODO: tikzmarks listing lib
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @end}{\ca@Strut}%
     % step the line id counter
     \global\advance\csname c@codeanim@#1@lc\endcsname by1\relax
@@ -87,6 +88,8 @@
     % using empty so it does not jump!
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
 }%
+% #1 allows for horiz shift
+\newcommand\AnimLoc[2][0pt]{\rlap{\hspace*{##1}\tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @##2}{\ca@Strut}}}%
 % furthermore we want to configure some numbers with beamer animations!
 % TODO: support for mid-code highlights by literates! like @ as a marker?!
 \ca@DecodeHandouts
@@ -197,6 +200,7 @@
 
 \def\ca@Leftmark{\llap{\faAngleRight~}}
 \def\ca@Rightmark{\rlap{\faAngleLeft}}% currently there is a buffer :D
+\def\ca@Botmark{\smash{\clap{\faAngleUp}}}% currently there is a buffer :D
 \def\ca@start{start}\def\ca@end{end}
 % TODO: Botmark and stuff
 \tikzset{ca@CommentNode/.style={font=\sffamily\small\slshape,gray,right=3mm,yshift=.2mm},ca@CommentNode@out/.style={ca@CommentNode,font=\sffamily\footnotesize\slshape,lightgray}}
@@ -209,8 +213,8 @@
 \else\ifx\ca@anim@curentlocation\ca@end
     \node[right] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ca@Rightmark};
 \else\ifx\ca@anim@curentlocation\@empty% do nothing in that case
-\else % TODO: use botmark!
-    \node[right] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ca@Rightmark};
+\else
+    \node[below] at (ca@\ca@cdname-\ca@anim@currentline @\ca@anim@curentlocation.south) {\ca@Botmark};
 \fi\fi\fi
 \fi % i want comments with my zero :)
     % put a comment there:
