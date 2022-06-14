@@ -47,11 +47,11 @@
 
 % TODO: use firstoftwo and second of two
 \def\ca@InCurrentLineActive#1#2#3{%
-    % AND are we in animation Run? otherwise always
-    \ifnum\ca@anim@currentline>0#2
+    % AND are we in animation Run? otherwise always # negatives to fake this check!
+    \ifnum\ca@anim@currentline=0#2\else
     % are we in the current line?
     \expandafter\ifnum\number\csname c@codeanim@#1@lc\endcsname=\ca@anim@currentline
-    #2\else#3\fi\else#2\fi}
+    #2\else#3\fi\fi}
 
 \newif\if@ca@@active@found@
 \def\ca@InOtherLineActive#1#2#3{%
@@ -212,7 +212,7 @@
 \def\ca@DoCodeAnimation{%
 \tikzpicture[overlay,remember picture]%
 % make the line markers :)
-\ifnum\ca@anim@currentline>0 %
+\ifnum\ca@anim@currentline>0 % here we only allow positives (there are no negative lines to place)
 \ifx\ca@anim@curentlocation\ca@start
     \node[left] at (ca@\ca@cdname-\ca@anim@currentline @start.west) {\ca@Leftmark};
 \else\ifx\ca@anim@curentlocation\ca@end
@@ -221,9 +221,11 @@
 \else
     \node[below] at (ca@\ca@cdname-\ca@anim@currentline @\ca@anim@curentlocation.south) {\ca@Botmark};
 \fi\fi\fi
-\fi % i want comments with my zero :)
+\fi % i want comments with my zero :) but not with negative numbers!
     % put a comment there:
+\ifnum\ca@anim@currentline<0\else
     \node[ca@CommentNode] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ignorespaces\ca@anim@currentcomment};
+\fi
 % animate all visible ones
 % do not go down:
 % include '='
@@ -232,7 +234,10 @@
 \ifnum\ca@comments@from>\ca@Maximum\else
 \foreach \@comment@on in {\ca@comments@from,...,\ca@Maximum} {%
     \@ifundefined{@\@comment@on @comment@text}{}{%
-        \node[ca@CommentNode@out] at (ca@\ca@cdname-\csname @\@comment@on @comment@location\endcsname @end.east) {\ignorespaces\csname @\@comment@on @comment@text\endcsname};
+        \edef\@location{\csname @\@comment@on @comment@location\endcsname}%
+        \ifnum\@location>0 % guard against negatives
+        \node[ca@CommentNode@out] at (ca@\ca@cdname-\@location @end.east) {\ignorespaces\csname @\@comment@on @comment@text\endcsname};
+        \fi
     }%
 }%
 \fi
