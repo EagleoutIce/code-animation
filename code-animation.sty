@@ -189,7 +189,9 @@
     \@AnimationCommands
     % clear it on the start
     \only<\ca@firstslide>{\def\ca@comments@from{0}}%
+    \let\@animcode@last\@empty % no last on init
     \foreach[count=\@anim@on from \ca@firstslide,remember=\@anim as \old@anim (initially 0)] \@animcode in \ca@onslide@list {%
+        % \typeout{[\ca@cdname] AT: \@anim@on; last: \old@anim code: \meaning\@animcode [last \meaning\@animcode@last]}%
         \expandafter\ca@DecodeAnimationCommand\@animcode\@empty\@empty\@null
         \expandafter\protected@xdef\csname @\@anim@on @comment@text\endcsname{\@comment@text}%
         \expandafter\protected@xdef\csname @\@anim@on @comment@location\endcsname{\@anim}%
