@@ -115,7 +115,7 @@
     \def\ca@othersonly{\let\ca@anim@curentlocation\@empty\ca@simpleothers}%
     \def\ca@comment##1:##2\@null{\def\@anim{##1}\def\@comment@text{##2}}%
     \def\ca@resetcomment{\ca@reset\ca@comment}%
-    \def\ca@hidden{\let\ca@anim@curentlocation\@empty\def\@anim{-1}\let\ca@anim@otherhighlights\@empty}%
+    \def\ca@hidden{\let\ca@anim@curentlocation\@empty\def\@anim{-1}\def\ca@anim@otherhighlights{}}%
     \def\ca@custom{% TODO: unify so others use readable syntax as well!
         \def\Line####1{\def\@anim{####1}}%
         \def\NextLine{\RelativeLine1}%
@@ -123,7 +123,7 @@
         \def\RelativeLine####1{\edef\@anim{\the\numexpr\old@anim+####1\relax}}%
         \def\Comment####1{\def\@comment@text{####1}}%
         \def\Reset{\ca@reset}%
-        \def\Hidden{\ca@resetcomment}%
+        \def\Hidden{\ca@hidden}%
         \def\Forever{\edef\@anim@on{\@anim@on-}}%
         \def\StoreAnimationTo####1{\ca@Record####1{\@anim@on}}%
         \def\StoreHandoutTo####1{\ca@Record####1{\ca@MapToHandout{\@anim@on}}}%
