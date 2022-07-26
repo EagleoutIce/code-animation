@@ -82,8 +82,8 @@
 }%
 % hook the start marker at the beginning:
 % TODO: maybe embed them just around escapings?
-\preto\lst@OutputToken{\ca@fadeout@start{#1}}% box to be in the same group
-\appto\lst@OutputToken{\ca@fadeout@end}% will automatically hide if not in env
+\preto\lsthk@OutputBox{\ca@fadeout@start{#1}\appto\lst@righthss{\ca@fadeout@end}}% box to be in the same group
+% \appto\lsthk@OutputToken{\ca@fadeout@end}% will automatically hide if not in env
 \appto\lsthk@EveryPar{% we do not do this multiple (in case of line breaks) to be safe
     % with markers, therefore we do not use EveryLine using empty so it does not jump!
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
