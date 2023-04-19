@@ -1,24 +1,27 @@
 \ProvidesPackage{code-animation}[2022/05/22 EagleoutIce - animating runs through code with beamer]
 
-% TODO: customize beamer stuff :D
+% TODO: customize beamer configuration
 \RequirePackage{etoolbox}
 \RequirePackage{listings}
 \RequirePackage{tikz}
 \usetikzlibrary{tikzmark}
 
-\RequirePackage{fontawesome}
+\RequirePackage{fontawesome} % used for default symbols
 \RequirePackage{xxcolor} % mixin
 
 % TODO: allow for symbolic markers in the animations to reuse them instead of the animation number (e.g -> storeXX syntax) (StoreHandoutTo, StoreAnimationTo)
 % we may want to add a new literate to be used in the code:
 % TODO:
-\def\ca@lst@addToLiterate#1{\protected@edef\lst@literate{\unexpanded\expandafter{\lst@literate}\unexpanded{#1}}}
+\def\ca@lst@addToLiterate#1{%
+    \protected@edef\lst@literate{%
+        \unexpanded\expandafter{\lst@literate}\unexpanded{#1}%
+    }%
+}
 \lst@Key{code-animations@add to literate}{}{\ca@lst@addToLiterate{#1}}
-% TODO: use those in the code so they are availble with the star option
+% TODO: use those in the code so they are available with the star option
 
-% TODO: redfine to kill that :D
+% TODO: redefine to kill that :D
 \def\ca@colormixin@env{colormixin}
-%
 
 % i do not use groups as this has problems with lst
 % as they can not be nested, one storage is enough
@@ -26,24 +29,51 @@
 \def\ca@colormixin@suff{!15!lightgray}
 
 \let\ca@oldcolormixin\@empty
+
 \def\@ca@@fadeout@start{%
-\let\ca@Mixin\ca@colormixin@env
-\let\ca@oldcolormixin\colorcurrentmixin
-\edef\colorcurrentmixin{\ca@colormixin@suff\colorcurrentmixin}\@declaredcolor{.}%
+    \let\ca@Mixin\ca@colormixin@env
+    \let\ca@oldcolormixin\colorcurrentmixin
+    \edef\colorcurrentmixin{\ca@colormixin@suff\colorcurrentmixin}%
+    \@declaredcolor{.}%
 }
-\def\@ca@fadeout@start#1{\ca@InCurrentLineActive{#1}\@empty{\ca@InOtherLineActive{#1}\@empty{\@ca@@fadeout@start}}\relax}
+
+\def\@ca@fadeout@start#1{%
+    \ca@InCurrentLineActive{#1}%
+        \@empty
+        {%
+            \ca@InOtherLineActive{#1}%
+                \@empty
+                {\@ca@@fadeout@start}%
+        }%
+    \relax
+}
 
 % guard to not close unnecessary
-\def\@ca@fadeout@end{\ifx\ca@colormixin@env\ca@Mixin
-\let\colorcurrentmixin\ca@oldcolormixin\@declaredcolor{.}\fi\let\ca@Mixin\relax}
-
+\def\@ca@fadeout@end{%
+    \ifx\ca@colormixin@env\ca@Mixin
+        \let\colorcurrentmixin\ca@oldcolormixin
+        \@declaredcolor{.}%
+    \fi
+    \let\ca@Mixin\relax
+}
 
 % TODO: include comments
-\def\CodeAnimationsNoFadeOut{\let\ca@fadeout@start\@gobble \let\ca@fadeout@end\@empty}
-\def\CodeAnimationsWithFadeOut{\let\ca@fadeout@start\@ca@fadeout@start \let\ca@fadeout@end\@ca@fadeout@end}
+\def\CodeAnimationsNoFadeOut{%
+    \let\ca@fadeout@start\@gobble
+    \let\ca@fadeout@end\@empty
+}
+
+\def\CodeAnimationsWithFadeOut{
+        \let\ca@fadeout@start\@ca@fadeout@start
+        \let\ca@fadeout@end\@ca@fadeout@end
+}
 \CodeAnimationsWithFadeOut
 
-\def\ca@Strut{\vphantom{\sol@font@fs@normal\sol@styles@lst@basic\strut}}
+\def\ca@Strut{%
+    \vphantom{%
+        \sol@font@fs@normal\sol@styles@lst@basic\strut
+    }%
+}
 
 % TODO: use firstoftwo and second of two
 \def\ca@InCurrentLineActive#1#2#3{%
@@ -51,7 +81,8 @@
     \ifnum\ca@anim@currentline=0#2\else
     % are we in the current line?
     \expandafter\ifnum\number\csname c@codeanim@#1@lc\endcsname=\ca@anim@currentline
-    #2\else#3\fi\fi}
+    #2\else#3\fi\fi
+}
 
 \newif\if@ca@@active@found@
 \def\ca@InOtherLineActive#1#2#3{%
@@ -88,6 +119,7 @@
     % with markers, therefore we do not use EveryLine using empty so it does not jump!
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
 }%
+
 % #1 allows for horiz shift
 \newcommand\AnimLoc[2][0pt]{\rlap{\hspace*{##1}\tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @##2}{\ca@Strut}}\expandafter\xdef\csname CodeAnim#1-##2\endcsname{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @##2}}%
 % furthermore we want to configure some numbers with beamer animations!
