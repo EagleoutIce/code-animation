@@ -102,10 +102,15 @@
 % reset counter in any way!
 \global\csname c@codeanim@#1@lc\endcsname0\relax
 % we appto locally to increment the current line counter
+\appto\lsthk@EOL{%
+    \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @end}{\ca@Strut}%
+}%
+\appto\lsthk@InitVars{%
+    \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @end}{\ca@Strut}%
+}%
 \appto\lsthk@OnNewLine{%
     % get the end marker for this line
     % TODO: tikzmarks listing lib
-    \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @end}{\ca@Strut}%
     % step the line id counter (ensures unique)
     \global\advance\csname c@codeanim@#1@lc\endcsname by1\relax
     % done!
