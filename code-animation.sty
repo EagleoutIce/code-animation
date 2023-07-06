@@ -9,6 +9,9 @@
 \RequirePackage{fontawesome} % used for default symbols
 \RequirePackage{xxcolor} % mixin
 
+\newif\ifca@beamermode
+\@ifundefined{only}{\ca@beamermodefalse}{\ca@beamermodetrue}
+
 % TODO: allow for symbolic markers in the animations to reuse them instead of the animation number (e.g -> storeXX syntax) (StoreHandoutTo, StoreAnimationTo)
 % we may want to add a new literate to be used in the code:
 % TODO:
@@ -136,14 +139,17 @@
 % we make it so that any item is *command* :)
 \def\ca@Record#1#2{\immediate\protected@write\@auxout{}{\protect\def\protect#1{#2}}\xdef#1{#2}}
 \def\CodeAnimGet#1{\@ifundefined{#1}{0}{\csname#1\endcsname}}
+\def\ca@on@handout{}
 \def\@AnimationCommands{%
+    \ifca@beamermode
     \mode<all>{\def\ca@reset{\def\ca@comments@from{\@anim@on}}}%
     \mode<handout>{\def\ca@reset{% directly reset
-        % if anim@on is below current:
-        \ifnum\@anim@on<\ca@MapFromHandout{\insertslidenumber}\relax
-            \xdef\ca@comments@from{\@anim@on}%
-        \else\def\ca@comments@from{\@anim@on}\fi
+    % if anim@on is below current:
+    \ifnum\@anim@on<\ca@MapFromHandout{\insertslidenumber}\relax
+        \xdef\ca@comments@from{\@anim@on}%
+    \else\def\ca@comments@from{\@anim@on}\fi
     }}%
+    \else\xdef\ca@comments@from{\@anim@on}\fi
     % the simple animation
     \def\ca@simple##1{\def\@anim{##1}}%
     % shift commentframe
@@ -164,8 +170,10 @@
         \def\Forever{\edef\@anim@on{\@anim@on-}}%
         \def\StoreAnimationTo####1{\ca@Record####1{\@anim@on}}%
         \def\StoreHandoutTo####1{\ca@Record####1{\ca@MapToHandout{\@anim@on}}}%
+        \ifca@beamermode
         \mode<all>{\let\StoreTo\StoreAnimationTo}%
         \mode<handout>{\let\StoreTo\StoreHandoutTo}%
+        \else\let\StoreTo\StoreHandoutTo\fi
         \def\Location####1{\def\ca@anim@curentlocation{####1}}%
         \def\NoLocation{\let\ca@anim@curentlocation\@empty}%
         \def\Others####1{\def\ca@anim@otherhighlights{####1}}%
@@ -194,6 +202,7 @@
 }
 % used for easier expandafter to lock the anim
 % we may globalize:
+\ifca@beamermode
 \def\ca@Only#1#2#3#4#5{\only<\@anim@on|handout:\ca@MapToHandout{\@anim@on}>{% this is the activator
     \gdef\ca@comments@from{#1}% re-account comments from this id
     \gdef\ca@anim@currentline{#2}%
@@ -201,6 +210,15 @@
     \gdef\ca@anim@curentlocation{#4}%
     \gdef\ca@anim@otherhighlights{#5}% highlight lines (extra) in fade-out
 }}
+\else
+\def\ca@Only#1#2#3#4#5{% we ignore anim on
+    \gdef\ca@comments@from{#1}% re-account comments from this id
+    \gdef\ca@anim@currentline{#2}%
+    \gdef\ca@anim@currentcomment{#3}%
+    \gdef\ca@anim@curentlocation{#4}%
+    \gdef\ca@anim@otherhighlights{#5}% highlight lines (extra) in fade-out
+}
+\fi
 
 % if it is not there, do not put it on the handout
 \def\ca@MapToHandout#1{\@ifundefined{ca@@map@#1@}{0}{\csname ca@@map@#1@\endcsname}}
@@ -225,7 +243,9 @@
     \let\ca@anim@currentcomment\@empty
     \@AnimationCommands
     % clear it on the start
+    \ifca@beamermode
     \only<\ca@firstslide>{\def\ca@comments@from{0}}%
+    \else\def\ca@comments@from{0}\fi
     \let\@animcode@last\@empty % no last on init
     \foreach[count=\@anim@on from \ca@firstslide,remember=\@anim as \old@anim (initially 0)] \@animcode in \ca@onslide@list {%
         % \typeout{[\ca@cdname] AT: \@anim@on; last: \old@anim code: \meaning\@animcode [last \meaning\@animcode@last]}%
@@ -271,8 +291,12 @@
 % animate all visible ones
 % do not go down:
 % include '='
+\ifca@beamermode
 \mode<all>{\edef\ca@Maximum{\the\numexpr\insertslidenumber-1\relax}}%
 \mode<handout>{\def\ca@Maximum{\the\numexpr\ca@MapFromHandout{\insertslidenumber}-1\relax}}%
+\else
+\def\ca@Maximum{1} % without animations, there is only one
+\fi
 \ifnum\ca@comments@from>\ca@Maximum\else
 \foreach \@comment@on in {\ca@comments@from,...,\ca@Maximum} {%
     \@ifundefined{@\@comment@on @comment@text}{}{%
