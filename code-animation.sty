@@ -110,9 +110,9 @@
 \appto\lsthk@EOL{%
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @end}{\ca@Strut}%
 }%
-\appto\lsthk@InitVars{%
-    \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @end}{\ca@Strut}%
-}%
+% \appto\lsthk@InitVars{%
+%     a\tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @end}{\ca@Strut}w%
+% }%
 \appto\lsthk@OnNewLine{%
     % get the end marker for this line
     % TODO: tikzmarks listing lib
@@ -277,7 +277,8 @@
 \def\ca@DoCodeAnimation{%
 \tikzpicture[overlay,remember picture]%
 % make the line markers :)
-\ifnum\ca@anim@currentline>0 % here we only allow positives (there are no negative lines to place)
+\ifnum\ca@anim@currentline>0\relax
+% here we only allow positives (there are no negative lines to place)
 \ifx\ca@anim@curentlocation\ca@start
     \node[left] at (ca@\ca@cdname-\ca@anim@currentline @start.west) {\ca@Leftmark};
 \else\ifx\ca@anim@curentlocation\ca@end
@@ -286,9 +287,8 @@
 \else
     \node[below] at (ca@\ca@cdname-\ca@anim@currentline @\ca@anim@curentlocation.south) {\ca@Botmark};
 \fi\fi\fi
-\fi % i want comments with my zero :) but not with negative numbers!
-    % put a comment there:
-\ifnum\ca@anim@currentline<0\else
+\fi
+\ifnum\ca@anim@currentline>0\relax
     \node[ca@CommentNode] at (ca@\ca@cdname-\ca@anim@currentline @end.east) {\ignorespaces\ca@anim@currentcomment};
 \fi
 % animate all visible ones
