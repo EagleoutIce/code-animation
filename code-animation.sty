@@ -66,7 +66,7 @@
     \let\ca@fadeout@end\@empty
 }
 
-\def\CodeAnimationsWithFadeOut{
+\def\CodeAnimationsWithFadeOut{%
         \let\ca@fadeout@start\@ca@fadeout@start
         \let\ca@fadeout@end\@ca@fadeout@end
 }
@@ -127,7 +127,7 @@
     % with markers, therefore we do not use EveryLine using empty so it does not jump!
     \tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @start}{\ca@Strut}%
 }%
-
+%
 % #1 allows for horiz shift
 \newcommand\AnimLoc[2][0pt]{\rlap{\hspace*{##1}\tikzmarknode{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @##2}{\ca@Strut}}\expandafter\xdef\csname CodeAnim#1-##2\endcsname{ca@#1-\expandafter\the\csname c@codeanim@#1@lc\endcsname @##2}}%
 % furthermore we want to configure some numbers with beamer animations!
@@ -181,22 +181,23 @@
 }
 % TODO: optional arg for all for custom commands?
 \def\ca@DecodeAnimationCommand#1#2\@null{%
-    \def\@anim{0}\let\@comment@text\@empty \let\ca@anim@otherhighlights\@empty
+    \def\@anim{0}\let\@comment@text\@empty
+    \let\ca@anim@otherhighlights\@empty
     \def\ca@anim@curentlocation{start}% default value(s)
-    \if#1. \ca@resetsimple{#2}\else
-    \if#1: \ca@simpleothers#2\@null\else
-    \if#1o \ca@othersonly#2\@null\else
-    \if#1/ \ca@comment#2\@null\else
-    \if#1| \ca@resetcomment#2\@null\else
-    \if#1* \ca@custom#2\else
-    \if#1h \ca@hidden\else
-    \if#1+ \ca@simple{\the\numexpr\old@anim+1\relax}\else
+    \if#1.\relax\ca@resetsimple{#2}\else
+    \if#1:\relax\ca@simpleothers#2\@null\else
+    \if#1o\relax\ca@othersonly#2\@null\else
+    \if#1/\relax\ca@comment#2\@null\else
+    \if#1|\relax\ca@resetcomment#2\@null\else
+    \if#1*\relax\ca@custom#2\else
+    \if#1h\relax\ca@hidden\else
+    \if#1+\relax\ca@simple{\the\numexpr\old@anim+1\relax}\else
     % use the last one! and keep it in memory
-    \if#1- \let\@animcode\@animcode@last\expandafter\ca@DecodeAnimationCommand\@animcode@last\@empty\@empty\@null\else
+    \if#1-\relax\let\@animcode\@animcode@last\expandafter\ca@DecodeAnimationCommand\@animcode@last\@empty\@empty\@null\else
     % else do it at a number:
         \ca@simple{#1#2}%
     \fi\fi\fi\fi\fi\fi\fi\fi\fi
-    \if#1- \relax\else % minus is never a last!
+    \if#1-\relax\else % minus is never a last!
         \global\let\@animcode@last\@animcode
     \fi
 }
