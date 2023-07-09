@@ -33,11 +33,13 @@
 
 \let\ca@oldcolormixin\@empty
 
+\colorlet{ca@base@color}{black}
+
 \def\@ca@@fadeout@start{%
     \let\ca@Mixin\ca@colormixin@env
     \let\ca@oldcolormixin\colorcurrentmixin
     \edef\colorcurrentmixin{\ca@colormixin@suff\colorcurrentmixin}%
-    \@declaredcolor{.}%
+    \@declaredcolor{ca@base@color}%
 }
 
 \def\@ca@fadeout@start#1{%
