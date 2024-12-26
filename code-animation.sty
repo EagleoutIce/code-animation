@@ -73,11 +73,7 @@
 }
 \CodeAnimationsWithFadeOut
 
-\def\ca@Strut{%
-    \vphantom{%
-        \sol@font@fs@normal\sol@styles@lst@basic\strut
-    }%
-}
+\def\ca@Strut{\vphantom{\ttfamily\strut}}
 
 % TODO: use firstoftwo and second of two
 \def\ca@InCurrentLineActive#1#2#3{%

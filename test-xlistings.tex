@@ -1,0 +1,76 @@
+\errorcontextlines9999
+\documentclass{beamer}
+\usepackage{code-animation}
+\usepackage[style=plain]{xlistings}
+
+\let\T\texttt
+\begin{document}
+% \CodeAnimationsNoFadeOut
+\begin{frame}[fragile]
+\AnimateCode{onslide={%
+   % o would allow a negative number which would be the same as no highlight
+   o3:{4,5},-,-, % only highlight no line marker
+   2,+,+,+, % just a highlight
+   :1:{6}, % : allows to specify others to highlight
+   /2: Nun ist \T{i = 9}, % highlight with comment
+   /3: Hat jemand einen Pinguin gesehen?,
+   /4: $3x^2$, .5, % basic highlight which rests comments
+   /2: Nun ist wieder \T{i = 9}, /3: Pinguuuu, 4,
+   |5: Ein neues leben!,% comments which resets other comments
+   3,3, 0, % Dopplungen sind kein Problem, 0 shows full code
+   *\Line{4}\Comment{Walter}\Location{end}\StoreAnimationTo\WalterAnim\StoreHandoutTo\WalterHandout\StoreTo\Walter,
+   *\Line{4}\Comment{Custom!}\Location{k}\Reset,% komplett frei :D
+   3, .4
+},handout={8/2,\CodeAnimGet{WalterAnim}/3},first slide=5}% CodeAnimGet can be used pre definition
+\begin{minted}[escapeinside={/*}{*/}]{java}
+/*\onslide<2->*/public static void main(String[] args) {
+/*\onslide<3->*/   int i = 9;
+/*\onslide<3->*/   char x = 'c';
+/*\onslide<3->*/   String /*\AnimLoc[2pt]{k}*/k = "k";
+/*\onslide<4->*/   System.out.println(x + ": " + i);
+/*\onslide<2->*/}
+\end{minted}
+\endAnimateCode
+Walter kommt (nur bei Animationen natürlich) auf Slide \WalterAnim~(\CodeAnimGet{WalterAnim}). Sein Handout-Mapping ist Folie \WalterHandout~(\CodeAnimGet{WalterHandout}). Das Auto-Mapping ist \Walter~(\CodeAnimGet{Walter}). Markername: \GetAnimLoc{k}. % TODO: improve handling of symbolic stuff
+\end{frame}
+
+\begin{frame}
+   buffer
+\end{frame}
+
+\begin{frame}[fragile]
+\AnimateCode{onslide={1, % just a highlight
+   /2: Nun ist \T{i = 12}, % highlight with comment
+   /3: Hat jemand einen Pinguin gesehen?,
+   /4: $3x^2$,
+   .5, % basic highlight which rests comments
+   /2: Nun ist wieder \T{i = 12},
+   /3: Pinguuuu,
+   4,
+   |5: Ein neues leben!,% comments which resets other comments
+   3,3, % auch kein Problem
+   0, % show full code
+   *\Line{4}\Comment{Walter}\Location{end},% komplett frei :D
+   3, .4
+},first slide=2}
+\begin{minted}{java}
+public static void main(String[] args) {
+   int i = 12;
+   char x = 'c';
+   String k = "k";
+   System.out.println(x + ": " + i);
+}
+\end{minted}
+\endAnimateCode
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{minted}{java}
+public static void main(String[] args) {
+   int i = 9;
+   char x = 'c';
+   System.out.println(x + ": " + i);
+}
+\end{minted}
+\end{frame}
+\end{document}
