@@ -4,40 +4,31 @@ name: Compile the showcases
     branches: [master, main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout git repository
-      uses: actions/checkout@v2
-      with:
-        lfs: true
-        submodules: true
-    - name: Setup Python environment for sltx
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-    - name: Setup and run sltx-install
-      run: |
-        pip install sltx
-        echo "tx-default" | sltx docker
-    - name: Install PU for previews
-      run: sudo apt install poppler-utils
+      uses: actions/checkout@v4
+    - name: Fetch sopra-listings
+      run: git clone --depth 1 https://github.com/EagleoutIce/sopra-collection.git "$RUNNER_TEMP/sopra"
     - name: Compile the Documents
       run: |
-        sltx compile --root --recipe 'default-latexmk.recipe' --profile "tx-default" "test.tex"
+        docker run --rm -v "$PWD:/work" -v "$RUNNER_TEMP/sopra:/sopra:ro" -w /work \
+          -e TEXINPUTS=.:/sopra//: texlive/texlive:latest \
+          latexmk -pdf -interaction=nonstopmode test.tex test-xlistings.tex
     - name: 🖼️ Generate preview
       run: |
-         pdftoppm -png -r 300 -f 35 -l 37 ./test.pdf preview
+        sudo apt-get install -y poppler-utils
+        pdftoppm -png -r 300 -f 35 -l 37 ./test.pdf preview
     - name: Commit
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add -f "test.pdf" "preview-*.png"
+        git add -f test.pdf test-xlistings.pdf preview-*.png
         git commit -m "Newly compiled data"
     - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        branch: gh-pages
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        force: true
+      run: git push -f origin HEAD:gh-pages
